@@ -15,6 +15,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -60,7 +61,9 @@ jobs:
         shell: pwsh
         run: |
           $setup = Get-ChildItem dist\*-Setup.exe | Select-Object -First 1
-          Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -Wait
+          # -Wait would also wait for the app the installer launches, so wait for the installer only
+          $p = Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -PassThru
+          $p.WaitForExit()
           $exe = "$env:LOCALAPPDATA\Programs\SC Dashboard\SC Dashboard.exe"
           if (-not (Test-Path $exe)) { throw "not installed at $exe" }
           if (-not (Get-Process "SC Dashboard" -ErrorAction SilentlyContinue)) { Start-Process $exe -ArgumentList '--no-update' }
