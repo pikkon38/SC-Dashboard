@@ -56,6 +56,26 @@ jobs:
       - name: Build installer
         run: iscc /DAppVersion=${{ steps.ver.outputs.version }} installer\sc-dashboard.iss
 
+      - name: Test the installer
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist\*-Setup.exe | Select-Object -First 1
+          Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -Wait
+          $exe = "$env:LOCALAPPDATA\Programs\SC Dashboard\SC Dashboard.exe"
+          if (-not (Test-Path $exe)) { throw "not installed at $exe" }
+          if (-not (Get-Process "SC Dashboard" -ErrorAction SilentlyContinue)) { Start-Process $exe -ArgumentList '--no-update' }
+          $ok = $false
+          foreach ($i in 1..30) {
+            try { $s = Invoke-RestMethod http://127.0.0.1:8770/api/status; $ok = $true; break } catch { Start-Sleep 2 }
+          }
+          Get-Content "$env:APPDATA\SC Dashboard\companion.log" -ErrorAction SilentlyContinue
+          if (-not $ok) { throw "the installed app didn't answer on port 8770" }
+          if ($s.version -ne "${{ steps.ver.outputs.version }}") { throw "wrong version: $($s.version)" }
+          $page = Invoke-WebRequest http://127.0.0.1:8770/ -UseBasicParsing
+          if ($page.Content -notmatch 'SC // DASH') { throw "dashboard page missing" }
+          "installed app is serving version $($s.version)"
+          Stop-Process -Name "SC Dashboard" -Force
+
       - uses: actions/upload-artifact@v4
         with:
           name: SC-Dashboard-${{ steps.ver.outputs.version }}-Setup
