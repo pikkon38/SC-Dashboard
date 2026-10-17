@@ -1,0 +1,524 @@
+{
+  "_comment": "Key names: a-z, 0-9, f1-f12, lalt, ralt, lctrl, rctrl, lshift, rshift, space, enter, tab, esc, backspace, insert, delete, home, end, pgup, pgdn, up, down, left, right, np0-np9, np+, np-, np*, np/, npenter, minus, equals, lbracket, rbracket, semicolon, apostrophe, comma, period, slash, backslash, grave. Mouse: lmb, rmb, mmb, wheelup, wheeldown. Combine with + (example: lalt+f5). Modes: tap, hold (holdMs), double. Leave keys empty for actions you have not bound in game.",
+  "actions": {
+    "pwr_weapons_up": {
+      "label": "Weapons +",
+      "keys": "f5",
+      "mode": "tap"
+    },
+    "pwr_weapons_down": {
+      "label": "Weapons -",
+      "keys": "lalt+f5",
+      "mode": "tap"
+    },
+    "pwr_weapons_max": {
+      "label": "Weapons max",
+      "keys": "f5",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_weapons_min": {
+      "label": "Weapons min",
+      "keys": "lalt+f5",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_thrusters_up": {
+      "label": "Thrusters +",
+      "keys": "f6",
+      "mode": "tap"
+    },
+    "pwr_thrusters_down": {
+      "label": "Thrusters -",
+      "keys": "lalt+f6",
+      "mode": "tap"
+    },
+    "pwr_thrusters_max": {
+      "label": "Thrusters max",
+      "keys": "f6",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_thrusters_min": {
+      "label": "Thrusters min",
+      "keys": "lalt+f6",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_shields_up": {
+      "label": "Shields +",
+      "keys": "f7",
+      "mode": "tap"
+    },
+    "pwr_shields_down": {
+      "label": "Shields -",
+      "keys": "lalt+f7",
+      "mode": "tap"
+    },
+    "pwr_shields_max": {
+      "label": "Shields max",
+      "keys": "f7",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_shields_min": {
+      "label": "Shields min",
+      "keys": "lalt+f7",
+      "mode": "hold",
+      "holdMs": 900
+    },
+    "pwr_reset": {
+      "label": "Reset power",
+      "keys": "f8",
+      "mode": "tap"
+    },
+    "pwr_all": {
+      "label": "Power on/off",
+      "keys": "u",
+      "mode": "tap"
+    },
+    "pwr_weapons_toggle": {
+      "label": "Weapons power",
+      "keys": "p",
+      "mode": "tap"
+    },
+    "pwr_shields_toggle": {
+      "label": "Shields power",
+      "keys": "o",
+      "mode": "tap"
+    },
+    "pwr_thrusters_toggle": {
+      "label": "Thrusters power",
+      "keys": "i",
+      "mode": "tap"
+    },
+    "pwr_quantum_up": {
+      "label": "Quantum +",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_quantum_down": {
+      "label": "Quantum -",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_quantum_toggle": {
+      "label": "Quantum power",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_radar_up": {
+      "label": "Radar +",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_radar_down": {
+      "label": "Radar -",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_radar_toggle": {
+      "label": "Radar power",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_lifesupport_up": {
+      "label": "Life support +",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_lifesupport_down": {
+      "label": "Life support -",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_lifesupport_toggle": {
+      "label": "Life support power",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_coolers_up": {
+      "label": "Coolers +",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_coolers_down": {
+      "label": "Coolers -",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_coolers_toggle": {
+      "label": "Coolers power",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_tractor_up": {
+      "label": "Tractor beam +",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_tractor_down": {
+      "label": "Tractor beam -",
+      "keys": "",
+      "mode": "tap"
+    },
+    "pwr_tractor_toggle": {
+      "label": "Tractor beam power",
+      "keys": "",
+      "mode": "tap"
+    },
+    "flight_ready": {
+      "label": "Flight ready",
+      "keys": "ralt+r",
+      "mode": "tap"
+    },
+    "vtol": {
+      "label": "VTOL",
+      "keys": "k",
+      "mode": "tap"
+    },
+    "landing_gear": {
+      "label": "Landing gear",
+      "keys": "n",
+      "mode": "tap"
+    },
+    "request_landing": {
+      "label": "Request landing",
+      "keys": "lalt+n",
+      "mode": "tap"
+    },
+    "request_docking": {
+      "label": "Request docking",
+      "keys": "lalt+n",
+      "mode": "tap"
+    },
+    "autoland": {
+      "label": "Autoland",
+      "keys": "n",
+      "mode": "hold",
+      "holdMs": 1200
+    },
+    "gsafe": {
+      "label": "G-safe",
+      "keys": "",
+      "mode": "tap"
+    },
+    "decoupled": {
+      "label": "Decoupled",
+      "keys": "c",
+      "mode": "tap"
+    },
+    "cruise": {
+      "label": "Cruise control",
+      "keys": "lalt+c",
+      "mode": "tap"
+    },
+    "quantum_mode": {
+      "label": "Quantum mode",
+      "keys": "b",
+      "mode": "tap"
+    },
+    "space_brake": {
+      "label": "Space brake",
+      "keys": "x",
+      "mode": "hold",
+      "holdMs": 1500
+    },
+    "lights": {
+      "label": "Lights",
+      "keys": "l",
+      "mode": "tap"
+    },
+    "speed_limiter": {
+      "label": "Speed limiter",
+      "keys": "",
+      "mode": "tap"
+    },
+    "esp": {
+      "label": "ESP",
+      "keys": "",
+      "mode": "tap"
+    },
+    "doors": {
+      "label": "Doors",
+      "keys": "",
+      "mode": "tap"
+    },
+    "lock_doors": {
+      "label": "Lock doors",
+      "keys": "",
+      "mode": "tap"
+    },
+    "docking_camera": {
+      "label": "Docking camera",
+      "keys": "0",
+      "mode": "tap"
+    },
+    "social_accept": {
+      "label": "Accept invite",
+      "keys": "",
+      "mode": "tap"
+    },
+    "social_decline": {
+      "label": "Decline invite",
+      "keys": "",
+      "mode": "tap"
+    },
+    "chat_toggle": {
+      "label": "Chat",
+      "keys": "f12",
+      "mode": "tap"
+    },
+    "exit_seat": {
+      "label": "Exit seat",
+      "keys": "y",
+      "mode": "hold",
+      "holdMs": 1000
+    },
+    "headtrack_toggle": {
+      "label": "Head tracking on/off",
+      "keys": "np/",
+      "mode": "tap"
+    },
+    "headtrack_recenter": {
+      "label": "Head tracking recenter",
+      "keys": "np*",
+      "mode": "tap"
+    },
+    "decoy": {
+      "label": "Launch decoys",
+      "keys": "h",
+      "mode": "tap"
+    },
+    "decoy_burst_up": {
+      "label": "Decoy burst +",
+      "keys": "ralt+h",
+      "mode": "tap"
+    },
+    "decoy_burst_down": {
+      "label": "Decoy burst -",
+      "keys": "lalt+h",
+      "mode": "tap"
+    },
+    "noise": {
+      "label": "Deploy noise",
+      "keys": "j",
+      "mode": "tap"
+    },
+    "missile_mode": {
+      "label": "Missile mode",
+      "keys": "mmb",
+      "mode": "tap"
+    },
+    "missile_arm_more": {
+      "label": "Arm more missiles",
+      "keys": "g",
+      "mode": "tap"
+    },
+    "missile_reset": {
+      "label": "Reset armed missiles",
+      "keys": "lalt+g",
+      "mode": "tap"
+    },
+    "target_forward": {
+      "label": "Target ahead",
+      "keys": "t",
+      "mode": "tap"
+    },
+    "target_attackers": {
+      "label": "Cycle attackers",
+      "keys": "4",
+      "mode": "tap"
+    },
+    "target_hostiles": {
+      "label": "Cycle hostiles",
+      "keys": "5",
+      "mode": "tap"
+    },
+    "target_friendlies": {
+      "label": "Cycle friendlies",
+      "keys": "6",
+      "mode": "tap"
+    },
+    "target_all": {
+      "label": "Cycle all targets",
+      "keys": "7",
+      "mode": "tap"
+    },
+    "target_unlock": {
+      "label": "Unlock target",
+      "keys": "lalt+t",
+      "mode": "tap"
+    },
+    "pin_1": {
+      "label": "Pin slot 1",
+      "keys": "1",
+      "mode": "tap"
+    },
+    "pin_2": {
+      "label": "Pin slot 2",
+      "keys": "2",
+      "mode": "tap"
+    },
+    "pin_3": {
+      "label": "Pin slot 3",
+      "keys": "3",
+      "mode": "tap"
+    },
+    "pins_clear": {
+      "label": "Clear pins",
+      "keys": "0",
+      "mode": "tap"
+    },
+    "hail": {
+      "label": "Hail target",
+      "keys": "9",
+      "mode": "tap"
+    },
+    "scan_mode": {
+      "label": "Scan mode",
+      "keys": "v",
+      "mode": "tap"
+    },
+    "ping": {
+      "label": "Ping",
+      "keys": "tab",
+      "mode": "tap"
+    },
+    "mining_mode": {
+      "label": "Mining mode",
+      "keys": "m",
+      "mode": "tap"
+    },
+    "mining_fire": {
+      "label": "Mining laser (latched)",
+      "keys": "lmb",
+      "mode": "tap"
+    },
+    "mining_switch_laser": {
+      "label": "Switch laser",
+      "keys": "lalt+lmb",
+      "mode": "tap"
+    },
+    "mining_power_up": {
+      "label": "Laser power +",
+      "keys": "wheelup",
+      "mode": "tap"
+    },
+    "mining_power_down": {
+      "label": "Laser power -",
+      "keys": "wheeldown",
+      "mode": "tap"
+    },
+    "mining_power_toggle": {
+      "label": "Laser high/low",
+      "keys": "lalt+4",
+      "mode": "tap"
+    },
+    "mining_module_1": {
+      "label": "Mining module 1",
+      "keys": "lalt+1",
+      "mode": "tap"
+    },
+    "mining_module_2": {
+      "label": "Mining module 2",
+      "keys": "lalt+2",
+      "mode": "tap"
+    },
+    "mining_module_3": {
+      "label": "Mining module 3",
+      "keys": "lalt+3",
+      "mode": "tap"
+    },
+    "mining_gimbal": {
+      "label": "Mining gimbal",
+      "keys": "g",
+      "mode": "tap"
+    },
+    "jettison_cargo": {
+      "label": "Jettison cargo",
+      "keys": "lalt+j",
+      "mode": "tap"
+    },
+    "salvage_mode": {
+      "label": "Salvage mode",
+      "keys": "m",
+      "mode": "tap"
+    },
+    "salvage_fire": {
+      "label": "Salvage beam (latched)",
+      "keys": "lmb",
+      "mode": "tap"
+    },
+    "salvage_beam_left": {
+      "label": "Left head on/off",
+      "keys": "ralt+a",
+      "mode": "tap"
+    },
+    "salvage_beam_right": {
+      "label": "Right head on/off",
+      "keys": "ralt+d",
+      "mode": "tap"
+    },
+    "salvage_fracture": {
+      "label": "Fracture head",
+      "keys": "ralt+w",
+      "mode": "tap"
+    },
+    "salvage_disintegrate": {
+      "label": "Disintegrate head",
+      "keys": "ralt+s",
+      "mode": "tap"
+    },
+    "salvage_focus_all": {
+      "label": "Focus all heads",
+      "keys": "lalt+s",
+      "mode": "tap"
+    },
+    "salvage_focus_left": {
+      "label": "Focus left head",
+      "keys": "lalt+a",
+      "mode": "tap"
+    },
+    "salvage_focus_right": {
+      "label": "Focus right head",
+      "keys": "lalt+d",
+      "mode": "tap"
+    },
+    "salvage_focus_fracture": {
+      "label": "Focus fracture",
+      "keys": "lalt+w",
+      "mode": "tap"
+    },
+    "salvage_spacing_up": {
+      "label": "Beam spacing +",
+      "keys": "wheelup",
+      "mode": "tap"
+    },
+    "salvage_spacing_down": {
+      "label": "Beam spacing -",
+      "keys": "wheeldown",
+      "mode": "tap"
+    },
+    "salvage_gimbal": {
+      "label": "Salvage gimbal",
+      "keys": "g",
+      "mode": "tap"
+    },
+    "salvage_gimbal_reset": {
+      "label": "Gimbal reset",
+      "keys": "lalt+g",
+      "mode": "tap"
+    },
+    "salvage_cycle_module": {
+      "label": "Cycle salvage/tractor",
+      "keys": "rmb",
+      "mode": "tap"
+    },
+    "salvage_beam_axis": {
+      "label": "Beam axis",
+      "keys": "lalt+rmb",
+      "mode": "tap"
+    }
+  }
+}

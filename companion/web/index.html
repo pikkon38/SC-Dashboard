@@ -1,0 +1,1446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SC Dash">
+<meta name="theme-color" content="#05090f">
+<title>SC Dashboard</title>
+<style>
+:root{
+  --bg:#05090f; --panel:#0a131d; --panel2:#0e1a27; --line:#1b3346; --line2:#24465f;
+  --text:#cfe8f5; --dim:#6f8ea3; --faint:#35505f;
+  --accent:#43d9f0; --ok:#4be39b; --warn:#f5b545; --bad:#ff5a52;
+  --wpn:#ff8a3d; --thr:#43d9f0; --shd:#6c8dff; --pwr:#e9f26a;
+  --u: clamp(9px, min(1.05vw, 1.4vh), 18px);
+  --gap: calc(var(--u)*1.2);
+  --r: calc(var(--u)*.6);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overscroll-behavior:none}
+.sbody,.scroll,.snav{overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y}
+.strip,.tabs{overscroll-behavior-x:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:500 calc(var(--u)*1.35)/1.25 "Rajdhani","Eurostile","Bahnschrift","Segoe UI",system-ui,sans-serif;
+  letter-spacing:.04em;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+body{background:
+  radial-gradient(ellipse at 50% -20%, #0f2a3d 0%, transparent 60%),
+  repeating-linear-gradient(0deg, transparent 0 3px, rgba(67,217,240,.025) 3px 4px), var(--bg)}
+button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
+.app{height:100dvh;display:grid;grid-template-rows:auto 1fr;padding:
+  max(var(--gap),env(safe-area-inset-top)) max(var(--gap),env(safe-area-inset-right))
+  max(var(--gap),env(safe-area-inset-bottom)) max(var(--gap),env(safe-area-inset-left));gap:var(--gap)}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:var(--gap)}
+.brand{font-weight:700;letter-spacing:.25em;color:var(--accent);font-size:calc(var(--u)*1.3);white-space:nowrap}
+.tabs{display:flex;gap:calc(var(--u)*.5);margin-left:auto;margin-right:auto}
+.tab{padding:calc(var(--u)*.7) calc(var(--u)*2);border:1px solid var(--line);border-radius:var(--r);color:var(--dim);
+  text-transform:uppercase;letter-spacing:.2em;font-weight:700;min-height:calc(var(--u)*3.4)}
+.tab.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+.link{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*1.1);color:var(--dim);white-space:nowrap;text-transform:uppercase}
+.dot{width:.75em;height:.75em;border-radius:50%;background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.dot.warn{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+
+.view{display:none;min-height:0}
+.view.on{display:grid}
+
+/* panels */
+.panel{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:calc(var(--r)*1.4);
+  position:relative;min-height:0}
+.panel::before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(90deg,var(--accent) 0 calc(var(--u)*2),transparent 0) top left/100% 1px no-repeat,
+             linear-gradient(180deg,var(--accent) 0 calc(var(--u)*2),transparent 0) top left/1px 100% no-repeat;opacity:.7}
+.ptitle{font-size:calc(var(--u)*1.05);letter-spacing:.3em;color:var(--dim);text-transform:uppercase;font-weight:700}
+
+.btn{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.2em;text-align:center;
+  border:1px solid var(--line2);border-radius:var(--r);background:rgba(67,217,240,.04);
+  min-height:calc(var(--u)*4.4);padding:calc(var(--u)*.6);text-transform:uppercase;font-weight:700;letter-spacing:.14em;
+  transition:background .12s,border-color .12s,transform .06s}
+.btn small{font-size:.68em;color:var(--dim);letter-spacing:.12em;font-weight:600}
+.btn:active,.btn.flash{transform:scale(.97);background:rgba(67,217,240,.22);border-color:var(--accent)}
+.btn.lit{border-color:var(--ok);color:var(--ok);background:rgba(75,227,155,.10);box-shadow:inset 0 0 calc(var(--u)*1.4) rgba(75,227,155,.15)}
+.btn.lit small{color:var(--ok);opacity:.8}
+.btn.offstate{border-color:var(--bad);color:var(--bad);background:rgba(255,90,82,.08)}
+.btn.unbound{opacity:.38;border-style:dashed}
+.btn.danger{border-color:#5a2a2a}
+.btn.big{flex:1}
+
+/* ---- power view: in-game style MFD ---- */
+#power{grid-template-columns:minmax(0,1fr);place-items:stretch}
+.mfd{--m:var(--theme,#5cc8ff);
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto;gap:calc(var(--u)*.9);
+  padding:calc(var(--u)*1.2);border-radius:calc(var(--u)*1.6);min-height:0;
+  background:linear-gradient(160deg,#20262c,#0d1013 40%,#171b1f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px #000,0 calc(var(--u)*.6) calc(var(--u)*2) rgba(0,0,0,.6)}
+.mfd .k{--kc:var(--m);display:flex;align-items:center;justify-content:center;flex-direction:column;
+  min-height:calc(var(--u)*4.2);min-width:calc(var(--u)*5.5);padding:0 calc(var(--u)*.6);border-radius:calc(var(--u)*.45);
+  background:linear-gradient(180deg,#2a3036,#15191d);border:1px solid #05070a;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 0 #000;
+  color:#c9d3db;font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*1.05);transition:transform .05s,box-shadow .05s}
+.mfd .k b{font-size:calc(var(--u)*2.1);line-height:1;color:var(--m);font-weight:600}
+.mfd .k:active,.mfd .k.flash{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 0 #000;
+  background:linear-gradient(180deg,#1b2025,#101316)}
+.mfd .k i{display:block;width:60%;height:3px;border-radius:2px;margin-top:.35em;background:#30363c}
+.mfd .k.lit i{background:var(--m);box-shadow:0 0 6px var(--m)}
+.mfd .k.alert i{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.mfd .k.unbound{opacity:.4}
+.keyrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:calc(var(--u)*.6)}
+.keyrow.nav{grid-template-columns:1fr 1fr;grid-auto-flow:row}
+.keycol{display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*.9)}
+.keycol .k{min-height:calc(var(--u)*7)}
+.screen{position:relative;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  border-radius:calc(var(--u)*.5);overflow:hidden;color:var(--m);
+  background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--m) 7%,#03070b),#020406 75%);
+  box-shadow:inset 0 0 0 2px #000,inset 0 0 calc(var(--u)*3) rgba(0,0,0,.9)}
+.screen::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
+    linear-gradient(115deg,rgba(255,255,255,.035) 0 30%,transparent 30%)}
+.shead{display:flex;align-items:center;gap:calc(var(--u)*1.2);padding:calc(var(--u)*.8) calc(var(--u)*1.4);
+  border-bottom:1px solid var(--m3);text-transform:uppercase;letter-spacing:.28em;font-size:calc(var(--u)*1.05)}
+.shead .ttl{font-weight:700;font-size:calc(var(--u)*1.35);text-shadow:0 0 8px var(--m2)}
+.shead .chip{border:1px solid var(--m2);padding:.1em .6em;border-radius:3px;font-size:.9em}
+.shead .ship{margin-left:auto;color:var(--m2)}
+.shead .sync{display:none;background:var(--warn);color:#120c00;padding:.1em .6em;border-radius:3px;font-weight:700}
+.syncing .shead .sync{display:inline-block}
+
+.body{display:grid;grid-template-columns:auto minmax(0,1fr);min-height:0}
+.body > .col.gen{padding:calc(var(--u)*1.2) calc(var(--u)*.9) calc(var(--u)*1.2) calc(var(--u)*1.2);border-right:1px solid var(--m3);width:calc(var(--u)*10)}
+.strip{display:flex;gap:calc(var(--u)*.5);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-padding:0 calc(var(--u)*.8);
+  padding:calc(var(--u)*1.2) calc(var(--u)*.8);-webkit-overflow-scrolling:touch;scrollbar-width:none;min-height:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--u)*1.2),#000 calc(100% - var(--u)*1.2),transparent);
+          mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--u)*1.2),#000 calc(100% - var(--u)*1.2),transparent)}
+.strip::-webkit-scrollbar{display:none}
+.col{flex:0 0 calc(var(--u)*13.5);scroll-snap-align:start;min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;
+  gap:calc(var(--u)*.55);justify-items:center;padding:calc(var(--u)*.5) calc(var(--u)*.25);border:1px solid transparent;border-radius:3px;transition:border-color .4s,background .4s}
+.col.ping{border-color:var(--m2);background:var(--m4);transition:none}
+.col .foot{display:flex;align-items:center;gap:calc(var(--u)*.6)}
+.mfd .col .k.pwrk{width:calc(var(--u)*7);min-height:calc(var(--u)*4)}
+.pwrk svg{width:calc(var(--u)*1.9);height:calc(var(--u)*1.9);stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.pwrk.lit{color:var(--m)} .pwrk.alert{color:var(--bad)}
+.mfd .col .k{min-width:0;width:calc(var(--u)*4);min-height:calc(var(--u)*3.6)}
+.mfd .col .k b{font-size:calc(var(--u)*1.8)}
+.col .val{font-size:calc(var(--u)*2.5);font-weight:600;line-height:1;text-shadow:0 0 10px var(--m2);font-variant-numeric:tabular-nums}
+.col .val span{font-size:.45em;color:var(--m2)}
+.strip .pips{touch-action:pan-x;cursor:ns-resize}
+.pips{width:100%;display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:calc(var(--u)*.32);min-height:0;
+  padding:calc(var(--u)*.45);border-left:1px solid var(--m3);border-right:1px solid var(--m3);position:relative}
+.pips::before,.pips::after{content:"";position:absolute;left:-1px;right:-1px;height:calc(var(--u)*.6);border:1px solid var(--m2)}
+.pips::before{top:-1px;border-bottom:0} .pips::after{bottom:-1px;border-top:0}
+.pip{flex:1;min-height:calc(var(--u)*.8);max-height:calc(var(--u)*3);border:1px solid var(--m2);background:var(--m4);transition:background .08s,box-shadow .08s}
+.pip.on{background:var(--m);border-color:var(--m);box-shadow:0 0 calc(var(--u)*.9) var(--m2)}
+.pip.lk + .pip.lk{margin-bottom:calc(var(--u)*-.32 - 1px)}
+.pip.cap-off{border-style:dashed;border-color:var(--m2);background:transparent}
+.col.off .pip.on{background:var(--m3);box-shadow:none}
+.col .ico{width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);stroke:var(--m);fill:none;stroke-width:1.6;filter:drop-shadow(0 0 4px var(--m2))}
+.col .lbl{font-size:calc(var(--u)*.95);letter-spacing:.2em;text-transform:uppercase;text-align:center;padding:.1em .5em;border-radius:2px;white-space:nowrap}
+.col .st{font-size:calc(var(--u)*.85);letter-spacing:.16em;padding:.5em .4em;border:1px solid var(--m2);border-radius:2px;min-width:calc(var(--u)*3.4);text-align:center;cursor:pointer}
+.col.off .st{color:var(--bad);border-color:var(--bad)}
+.col.gen{cursor:default}
+.col.gen .pips{width:calc(var(--u)*7)}
+.col.gen .pip.on{background:transparent;border-color:var(--m);box-shadow:inset 0 0 calc(var(--u)*.6) var(--m2)}
+.col.gen .pip.used{background:var(--m3);border-color:var(--m3)}
+.col{position:relative}
+.col.unb::before{content:"TRACK ONLY";position:absolute;left:0;right:0;top:calc(var(--u)*4.1);font-size:calc(var(--u)*.7);letter-spacing:.2em;color:var(--warn);text-align:center;pointer-events:none}
+.shead .src{color:var(--m2)}
+.empty{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*1.2);
+  background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--m) 10%,#03070b),#020406 70%);text-align:center;overflow:hidden}
+.screen.noship .empty{display:flex}
+.empty .ring{width:calc(var(--u)*13);height:calc(var(--u)*13);border-radius:50%;border:1px solid var(--m3);position:relative;display:grid;place-items:center}
+.empty .ring::before{content:"";position:absolute;inset:calc(var(--u)*1.4);border-radius:50%;border:1px dashed var(--m2);animation:spin 18s linear infinite}
+.empty .ring::after{content:"";position:absolute;inset:-1px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 80%,var(--m2) 100%);
+  -webkit-mask:radial-gradient(circle,transparent 60%,#000 61%);mask:radial-gradient(circle,transparent 60%,#000 61%);animation:spin 4s linear infinite}
+.empty svg{width:calc(var(--u)*5);height:calc(var(--u)*5);stroke:var(--m);fill:none;stroke-width:1.2;filter:drop-shadow(0 0 6px var(--m2))}
+.empty h2{margin:0;font-size:calc(var(--u)*2.6);letter-spacing:.4em;font-weight:600;text-shadow:0 0 12px var(--m2);padding-left:.4em}
+.empty p{margin:0;color:var(--m2);letter-spacing:.2em;text-transform:uppercase;font-size:calc(var(--u)*1)}
+.empty .k{margin-top:calc(var(--u)*1.5);padding:0 calc(var(--u)*2)}
+.empty .bar{width:calc(var(--u)*18);height:2px;background:var(--m3);position:relative;overflow:hidden}
+.empty .bar::after{content:"";position:absolute;top:0;bottom:0;width:30%;background:var(--m);box-shadow:0 0 8px var(--m);animation:sweep 2.4s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sweep{0%{left:-30%}100%{left:100%}}
+.sfoot{display:flex;gap:calc(var(--u)*2);padding:calc(var(--u)*.6) calc(var(--u)*1.4);border-top:1px solid var(--m3);
+  font-size:calc(var(--u)*.95);letter-spacing:.24em;text-transform:uppercase;color:var(--m2)}
+.sfoot b{color:var(--m);font-weight:600}
+.sfoot .r{margin-left:auto}
+
+/* ---- shared frame; social / seat / head tracking keys live in every side key column ---- */
+:root{--theme:#5cc8ff}
+.app{grid-template-columns:minmax(0,1fr)}
+.top{grid-column:1/-1}
+.view{grid-row:2;grid-column:1;grid-template-columns:minmax(0,1fr)}
+.mfd,.tint,.warn,.danger,.trigger,.mfd .k.ok,.mfd .k.no{--m2:color-mix(in srgb,var(--m) 55%,transparent);--m3:color-mix(in srgb,var(--m) 22%,transparent);--m4:color-mix(in srgb,var(--m) 9%,transparent)}
+.warn{--m:var(--warn)} .danger{--m:var(--bad)}
+.mfd .k{position:relative;overflow:hidden}
+.keycol .kgap{flex:none;height:calc(var(--u)*1.6)}
+.mfd .k.ok{--m:var(--ok)} .mfd .k.no{--m:var(--bad)}
+.mfd .k.ok,.mfd .k.no{color:var(--m)}
+.mfd .k.ok i,.mfd .k.no i{background:var(--m);box-shadow:0 0 6px var(--m)}
+.mfd .keycol .k{min-width:calc(var(--u)*8.5);min-height:calc(var(--u)*5.6);font-size:calc(var(--u)*.95);letter-spacing:.12em}
+
+/* ---- tailored screens ---- */
+.sbody{display:grid;gap:calc(var(--u)*1);padding:calc(var(--u)*1.1);min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.sbody.fl,.sbody.cb{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sbody.mn{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr) minmax(0,1fr)}
+.sbody.sv{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+.pnl{position:relative;display:flex;flex-direction:column;gap:calc(var(--u)*.9);min-height:0;padding:calc(var(--u)*1.1);
+  border:1px solid var(--m3);background:linear-gradient(180deg,var(--m4),transparent 45%);border-radius:3px}
+.pnl::before,.pnl::after{content:"";position:absolute;width:calc(var(--u)*1.2);height:calc(var(--u)*1.2);border:1px solid var(--m);pointer-events:none}
+.pnl::before{top:-1px;left:-1px;border-right:0;border-bottom:0} .pnl::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.pnl h4{margin:0;font-size:calc(var(--u)*.95);letter-spacing:.3em;text-transform:uppercase;color:var(--m2);font-weight:700;display:flex;align-items:center;gap:.8em}
+.pnl h4::after{content:"";flex:1;height:1px;background:var(--m3)}
+
+.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head{position:relative;overflow:hidden;color:var(--m);border:1px solid var(--m2);background:var(--m4);border-radius:3px;
+  text-transform:uppercase;letter-spacing:.16em;font-weight:700;transition:background .12s,box-shadow .12s,scale .06s}
+:is(.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head):active,:is(.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head).flash{background:var(--m3);scale:.98}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3em;min-height:calc(var(--u)*5.2);padding:calc(var(--u)*.6);
+  font-size:calc(var(--u)*1.05);text-align:center;line-height:1.15}
+.tile small,.trigger small{font-size:.72em;color:var(--m2);letter-spacing:.14em;font-weight:600}
+.tile.big{min-height:calc(var(--u)*7);font-size:calc(var(--u)*1.7);flex:1;letter-spacing:.3em}
+.tile.lit,.rb.lit{background:var(--m);color:#020406;box-shadow:0 0 calc(var(--u)*1.2) var(--m2)}
+.tile.lit small{color:rgba(2,4,6,.65)}
+.unbound:is(.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head,.k){opacity:.38;border-style:dashed}
+.hold::before{content:"";position:absolute;inset:0;background:var(--m2);transform-origin:left;transform:scaleX(0);pointer-events:none}
+.hold.arming::before{transform:scaleX(1);transition:transform .7s linear}
+.tiles2{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*.7)}
+.tiles2 > :last-child:nth-child(odd){grid-column:1/-1}
+.tiles4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(var(--u)*.6)}
+
+/* switch rows */
+.sw{display:flex;align-items:center;justify-content:space-between;gap:1em;min-height:calc(var(--u)*4.4);padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.05);flex:none}
+.sw em{flex:none;width:calc(var(--u)*4.2);height:calc(var(--u)*2.2);border:1px solid var(--m2);border-radius:99px;position:relative;transition:background .15s}
+.sw em::after{content:"";position:absolute;top:calc(var(--u)*.25);left:calc(var(--u)*.25);width:calc(var(--u)*1.6);height:calc(var(--u)*1.6);border-radius:50%;background:var(--m2);transition:left .15s}
+.sw.lit em{background:var(--m3);border-color:var(--m)}
+.sw.lit em::after{left:calc(100% - var(--u)*1.85);background:var(--m);box-shadow:0 0 8px var(--m)}
+.sw.lit span{text-shadow:0 0 8px var(--m2)}
+
+/* gear lever */
+.lever{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr 1fr;gap:0 calc(var(--u)*1.4);padding:calc(var(--u)*1.1) calc(var(--u)*1.6);flex:1;min-height:calc(var(--u)*11)}
+.lever .slot{grid-row:1/3;width:calc(var(--u)*1.6);border:1px solid var(--m2);border-radius:99px;position:relative;background:rgba(0,0,0,.6);margin:0 calc(var(--u)*1)}
+.lever .knob{position:absolute;left:50%;top:0;transform:translateX(-50%);width:calc(var(--u)*4);height:calc(var(--u)*2.6);border-radius:4px;
+  background:linear-gradient(180deg,#3a4248,#14181c);border:1px solid var(--m);box-shadow:0 0 10px var(--m2);transition:top .3s cubic-bezier(.5,1.6,.5,1)}
+.lever.lit .knob{top:calc(100% - var(--u)*2.6)}
+.lever b{justify-self:start;color:var(--m3);font-size:calc(var(--u)*1.3);letter-spacing:.24em;font-weight:700}
+.lever b.up{align-self:start} .lever b.dn{align-self:end}
+.lever:not(.lit) b.up,.lever.lit b.dn{color:var(--m);text-shadow:0 0 8px var(--m2)}
+
+/* steppers / readouts */
+.stepper{display:flex;align-items:center;gap:calc(var(--u)*.8)}
+.mfd .stepper .k{flex:1;min-width:0;min-height:calc(var(--u)*4.4)}
+.readout{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:calc(var(--u)*6)}
+.readout b{font-size:calc(var(--u)*2.6);font-weight:600;line-height:1;text-shadow:0 0 10px var(--m2);font-variant-numeric:tabular-nums}
+.readout small{color:var(--m2);letter-spacing:.24em;text-transform:uppercase;font-size:calc(var(--u)*.85)}
+.readout.huge{flex:1;min-height:calc(var(--u)*7)}
+.readout.huge b{font-size:calc(var(--u)*5.5)}
+
+/* radar */
+.radar{position:relative;aspect-ratio:1;width:min(100%,calc(var(--u)*21));margin:0 auto;border-radius:50%;border:1px solid var(--m2);flex:none;
+  background:radial-gradient(circle,transparent 0 31%,var(--m3) 31.5% 32%,transparent 32.5% 64%,var(--m3) 64.5% 65%,transparent 65.5%),
+    linear-gradient(var(--m4),var(--m4))}
+.radar::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 0deg,transparent 0 75%,var(--m3) 100%);animation:spin 5s linear infinite}
+.rb{position:absolute;padding:.55em .7em;font-size:calc(var(--u)*.8);letter-spacing:.12em;background:rgba(2,4,6,.85)}
+.rb.n{top:5%;left:50%;transform:translateX(-50%)} .rb.s{bottom:5%;left:50%;transform:translateX(-50%)}
+.rb.w{left:3%;top:50%;transform:translateY(-50%)} .rb.e{right:3%;top:50%;transform:translateY(-50%)}
+.rc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30%;aspect-ratio:1;border-radius:50%;font-size:calc(var(--u)*.9);border-color:var(--m)}
+.pins{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(var(--u)*.5)}
+.pins .tile{min-height:calc(var(--u)*4);font-size:calc(var(--u)*.9);letter-spacing:.08em}
+
+/* fire trigger */
+.trigger{flex:1;min-height:calc(var(--u)*11);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6em;border-radius:calc(var(--u)*1);border-width:2px;
+  background:radial-gradient(circle at 50% 45%,var(--m3),var(--m4) 60%,transparent)}
+.trigger span{font-size:calc(var(--u)*3);letter-spacing:.35em;padding-left:.35em;text-shadow:0 0 12px var(--m2)}
+.trigger.lit{--m:var(--bad);animation:pulse 1.1s ease-in-out infinite}
+.trigger.lit small{color:var(--m)}
+@keyframes pulse{50%{box-shadow:0 0 calc(var(--u)*2.5) var(--m2),inset 0 0 calc(var(--u)*2.5) var(--m3)}}
+
+/* consumable modules */
+.module{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:calc(var(--u)*1);padding:calc(var(--u)*.6) calc(var(--u)*1);min-height:calc(var(--u)*4.8);text-align:left;font-size:calc(var(--u)*1.05);flex:none}
+.module b{width:calc(var(--u)*3.2);height:calc(var(--u)*3.2);display:grid;place-items:center;border:1px solid var(--m);border-radius:50%;font-size:calc(var(--u)*1.5)}
+.module i{width:calc(var(--u)*1);height:calc(var(--u)*1);border-radius:50%;background:var(--m3)}
+.module.used{background:var(--m3)}
+.module.used i{background:var(--m);box-shadow:0 0 8px var(--m)}
+.mods .danger{margin-top:auto}
+
+/* sliders */
+.vslider{flex:1;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.8);min-height:0}
+.vslider .track,.hslider .track{position:relative;border:1px solid var(--m2);border-radius:4px;touch-action:none;background-color:rgba(0,0,0,.4)}
+.vslider .track{flex:1;width:calc(var(--u)*6.5);min-height:calc(var(--u)*12);cursor:ns-resize;
+  background-image:repeating-linear-gradient(0deg,var(--m3) 0 1px,transparent 1px 10%)}
+.vslider .fill{position:absolute;left:0;right:0;bottom:0;height:var(--v,0%);background:linear-gradient(0deg,var(--m3),var(--m2))}
+.vslider .thumb{position:absolute;left:-14%;right:-14%;bottom:var(--v,0%);height:calc(var(--u)*1.8);transform:translateY(50%);
+  background:linear-gradient(180deg,#3a4248,#14181c);border:1px solid var(--m);border-radius:3px;box-shadow:0 0 10px var(--m2)}
+.hslider .track{height:calc(var(--u)*4.4);cursor:ew-resize;background-image:repeating-linear-gradient(90deg,var(--m3) 0 1px,transparent 1px 10%)}
+.hslider .fill{position:absolute;top:0;bottom:0;left:0;width:var(--v,0%);background:linear-gradient(90deg,var(--m3),var(--m2))}
+.hslider .thumb{position:absolute;top:-14%;bottom:-14%;left:var(--v,0%);width:calc(var(--u)*1.8);transform:translateX(-50%);
+  background:linear-gradient(90deg,#3a4248,#14181c);border:1px solid var(--m);border-radius:3px;box-shadow:0 0 10px var(--m2)}
+.pnl.power .readout b{font-size:calc(var(--u)*3.2)}
+
+/* salvage heads */
+.headrow{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:calc(var(--u)*.8)}
+.head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6em;min-height:calc(var(--u)*8);font-size:calc(var(--u)*1.05)}
+.head .emit{width:calc(var(--u)*2.8);height:calc(var(--u)*2.8);border-radius:50%;border:2px solid var(--m2)}
+.head.lit{background:var(--m3);border-color:var(--m)}
+.head.lit .emit{background:radial-gradient(circle,#fff,var(--m) 45%,transparent 72%);border-color:var(--m);box-shadow:0 0 14px var(--m)}
+.spacing{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6em;color:var(--m2);font-size:calc(var(--u)*.85);letter-spacing:.16em;text-transform:uppercase}
+.spacing b{color:var(--m)}
+.spacing .beams{position:relative;width:100%;height:calc(var(--u)*4.5);border-bottom:1px dashed var(--m3)}
+.spacing .beams i{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--m),transparent);box-shadow:0 0 8px var(--m);transition:left .15s}
+.spacing .beams i:first-child{left:calc(46% - var(--s,0)*42%)} .spacing .beams i:last-child{left:calc(54% + var(--s,0)*42%)}
+.heads .headrow{flex:1}
+.spacing .beams{flex:1;min-height:calc(var(--u)*4.5)}
+.spacing{justify-content:stretch}
+.heads .tiles4 .tile{min-height:calc(var(--u)*4.6);font-size:calc(var(--u)*.9);letter-spacing:.1em}
+
+/* ---- setup view ---- */
+#setup{grid-template-columns:auto minmax(0,1fr);gap:var(--gap)}
+.snav{display:flex;flex-direction:column;gap:calc(var(--u)*.5);padding:var(--gap);overflow:auto;min-width:calc(var(--u)*17)}
+.snav .ptitle{margin:calc(var(--u)*.8) 0 calc(var(--u)*.2)}
+.snav .ptitle:first-child{margin-top:0}
+.snb{display:flex;align-items:center;justify-content:space-between;gap:1em;text-align:left;padding:calc(var(--u)*.9) calc(var(--u)*1.1);
+  border:1px solid var(--line);border-radius:var(--r);color:var(--dim);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:calc(var(--u)*1.05)}
+.snb.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+.snb .cnt{font-size:.8em;color:var(--warn);letter-spacing:.04em;font-weight:600;text-transform:none}
+.snb.on .cnt{color:#3a2a00}
+.spage{display:none}
+.spage.on{display:block}
+.row.sticky{position:sticky;bottom:calc(var(--gap)*-1);margin:var(--gap) calc(var(--gap)*-1) calc(var(--gap)*-1);padding:var(--gap);background:linear-gradient(180deg,transparent,var(--panel) 30%)}
+tr.fromGame td{color:var(--dim)}
+.scroll{overflow:auto;padding:var(--gap);-webkit-overflow-scrolling:touch;user-select:text;-webkit-user-select:text}
+table{width:100%;border-collapse:collapse}
+td,th{padding:calc(var(--u)*.45) calc(var(--u)*.4);border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{color:var(--dim);font-size:calc(var(--u)*.95);letter-spacing:.2em;text-transform:uppercase}
+input,select{font:inherit;color:var(--text);background:#07101a;border:1px solid var(--line2);border-radius:calc(var(--r)*.7);
+  padding:calc(var(--u)*.45) calc(var(--u)*.6);width:100%;min-height:calc(var(--u)*3)}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+td.k{width:34%} td.m{width:20%} td.h{width:16%}
+.row{display:flex;gap:var(--gap);margin-top:var(--gap)}
+.row .btn{flex:1}
+.field{display:grid;grid-template-columns:1fr calc(var(--u)*14);align-items:center;gap:var(--gap);margin:calc(var(--u)*.6) 0}
+.note{color:var(--dim);font-size:calc(var(--u)*1.05);line-height:1.45;letter-spacing:.02em}
+.note b{color:var(--text)}
+h3{margin:calc(var(--u)*1.2) 0 calc(var(--u)*.4);font-size:calc(var(--u)*1.1);letter-spacing:.3em;color:var(--accent);text-transform:uppercase}
+h3:first-child{margin-top:0}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--u)*2 + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(calc(100% + var(--u)*4 + env(safe-area-inset-bottom)));visibility:hidden;opacity:0;
+  background:#2a0f0f;border:1px solid var(--bad);color:#ffd7d4;padding:.6em 1.2em;border-radius:var(--r);transition:transform .2s,opacity .2s,visibility 0s .2s;z-index:9;
+  font-size:calc(var(--u)*1.2);max-width:90vw}
+.toast.ok{background:#0c2419;border-color:var(--ok);color:#d4ffe9}
+.toast.show{transform:translateX(-50%) translateY(0);visibility:visible;opacity:1;transition:transform .2s,opacity .2s}
+
+/* portrait / narrow */
+@media (orientation:portrait), (max-width:900px){
+  :root{--u: clamp(9px, min(1.9vw, 1.15vh), 18px)}
+  .mfd .k{min-width:0}
+  #setup{grid-template-columns:auto minmax(0,1fr)}
+  .snav{min-width:calc(var(--u)*13)}
+  .brand{display:none}
+  .mfd .keycol .k{min-width:calc(var(--u)*7);font-size:calc(var(--u)*.85);letter-spacing:.08em}
+  .link span:last-child{display:none}
+  .tab{padding:calc(var(--u)*.7) calc(var(--u)*1.1);letter-spacing:.12em}
+  .tabs{overflow-x:auto;scrollbar-width:none}
+  .sbody{grid-auto-rows:max-content}
+  .sbody .pnl{min-height:auto}
+  .sbody.fl,.sbody.cb,.sbody.mn{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sbody.fl > :last-child,.sbody.cb > :first-child,.sbody.mn > :last-child{grid-column:1/-1}
+  .sbody.sv{grid-template-columns:minmax(0,1fr)}
+  .vslider .track{min-height:calc(var(--u)*22)}
+  .trigger{min-height:calc(var(--u)*14)}
+  .cb > :first-child{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:stretch}
+  .cb > :first-child h4{grid-column:1/-1}
+}
+@media (max-width:560px){
+  .mfd{padding:calc(var(--u)*.6);gap:calc(var(--u)*.5);grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto}
+  .mfd > div:empty{display:none}
+  .keycol{flex-direction:row}
+  .keycol .k{min-height:calc(var(--u)*4.2);flex:1}
+  .keyrow{gap:calc(var(--u)*.4)}
+  .keyrow .k{min-width:0;padding:0 .2em;letter-spacing:.06em;font-size:calc(var(--u)*.9)}
+  .body > .col.gen{width:calc(var(--u)*8)}
+  .col{flex-basis:calc(var(--u)*13.5)}
+  .shead .ship{display:none}
+  .col .lbl{letter-spacing:.08em}
+  .tab{padding:calc(var(--u)*.7) calc(var(--u)*1.2)}
+  .link span:last-child{display:none}
+  .keycol .kgap{display:none}
+  .mfd .keycol .k{min-width:0;min-height:calc(var(--u)*4.2);font-size:calc(var(--u)*.75);letter-spacing:.04em}
+  .cb > :first-child{display:flex}
+  #setup{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  .snav{flex-direction:row;overflow-x:auto;overflow-y:hidden;min-width:0;touch-action:pan-x;padding:calc(var(--u)*.6);scrollbar-width:none}
+  .snav .ptitle{display:none}
+  .snb{flex:none;padding:calc(var(--u)*.7) calc(var(--u)*.9);font-size:calc(var(--u)*.9)}
+  td.h,th:last-child{display:none}
+  .sbody.fl,.sbody.cb,.sbody.mn,.sbody.sv{grid-template-columns:minmax(0,1fr)}
+  .vslider .track{min-height:calc(var(--u)*22)}
+  .tabs{overflow-x:auto;scrollbar-width:none}
+  .tab{padding:calc(var(--u)*.7) calc(var(--u)*.9);letter-spacing:.1em}
+}
+.brand .bld{font-size:.55em;opacity:.55;letter-spacing:.08em;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">SC // DASH <span class="bld" id="appVer"></span></div>
+    <nav class="tabs">
+      <button class="tab on" data-view="power">Power</button>
+      <button class="tab" data-view="flight">Flight</button>
+      <button class="tab" data-view="combat">Combat</button>
+      <button class="tab" data-view="mining">Mining</button>
+      <button class="tab" data-view="salvage">Salvage</button>
+      <button class="tab" data-view="setup">Setup</button>
+    </nav>
+    <div class="link"><span class="dot" id="dot"></span><span id="linktext">Offline</span></div>
+  </header>
+
+  <!-- POWER -->
+  <main class="view on" id="power">
+    <div class="mfd" id="mfd">
+      <div></div>
+      <div class="keyrow" id="jump"></div>
+      <div></div>
+      <div class="keycol">
+        <button class="k" id="powerBtn" data-act="pwr_all">PWR<i></i></button>
+        <button class="k" id="resetBtn" data-act="pwr_reset">RST<i></i></button>
+        <span class="kgap"></span>
+        <button class="k ok" data-a="social_accept">ACCEPT<i></i></button>
+        <button class="k no" data-a="social_decline">DECLINE<i></i></button>
+        <button class="k" data-a="chat_toggle" data-k="toggle">CHAT<i></i></button>
+      </div>
+      <div class="screen" id="colsPanel">
+        <div class="shead"><span class="ttl">Power</span><span class="chip">SCM</span><span class="sync">Match · no keys</span><span class="ship" id="shipName">Ship: not set</span><span class="src" id="shipSrc"></span></div>
+        <div class="empty" id="empty">
+          <div class="ring"><svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg></div>
+          <h2 id="emptyTitle">NO SHIP</h2>
+          <p id="emptyText">Board a ship to bring power online</p>
+          <div class="bar"></div>
+          <button class="k" id="showAnyway">SHOW POWER ANYWAY<i></i></button>
+        </div>
+        <div class="body">
+          <div class="col gen">
+            <div class="val" id="genVal">0<span>/0</span></div>
+            <div class="pips" id="cap"></div>
+            <svg class="ico" viewBox="0 0 24 24"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></svg>
+            <div class="lbl">Free</div>
+          </div>
+          <div class="strip" id="cols"></div>
+        </div>
+        <div class="sfoot"><span>Free <b id="fFree">0</b></span><span>Used <b id="fUsed">0</b></span><span>Total <b id="fTotal">0</b></span><span class="r" id="fNote">Estimated</span></div>
+      </div>
+      <div class="keycol">
+        <button class="k" id="syncBtn">SYNC<i></i></button>
+        <button class="k" id="matchBtn">MATCH<i></i></button>
+        <span class="kgap"></span>
+        <button class="k" data-a="headtrack_toggle" data-k="toggle">HEAD TRK<i></i></button>
+        <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
+        <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
+      </div>
+      <div></div>
+      <div class="keyrow nav">
+        <button class="k" id="pgPrev"><b>◀</b></button>
+        <button class="k" id="pgNext"><b>▶</b></button>
+      </div>
+      <div></div>
+    </div>
+  </main>
+
+  <!-- FLIGHT -->
+  <main class="view" id="flight">
+    <div class="mfd frame">
+      <div></div>
+      <div class="keyrow">
+        <button class="k" data-a="flight_ready">FLT READY<i></i></button>
+        <button class="k" data-a="quantum_mode" data-k="toggle">QT MODE<i></i></button>
+        <button class="k" data-a="space_brake">SPACE BRAKE<i></i></button>
+        <button class="k" data-a="lights" data-k="toggle">LIGHTS<i></i></button>
+      </div>
+      <div></div>
+      <div class="keycol">
+        <button class="k ok" data-a="social_accept">ACCEPT<i></i></button>
+        <button class="k no" data-a="social_decline">DECLINE<i></i></button>
+        <button class="k" data-a="chat_toggle" data-k="toggle">CHAT<i></i></button>
+      </div>
+      <div class="screen">
+        <div class="shead"><span class="ttl">Flight</span><span class="chip">IFCS</span><span class="ship shipName"></span></div>
+        <div class="sbody fl">
+          <section class="pnl">
+            <h4>Flight control</h4>
+            <button class="sw" data-a="decoupled" data-k="toggle"><span>Decoupled</span><em></em></button>
+            <button class="sw" data-a="cruise" data-k="toggle"><span>Cruise control</span><em></em></button>
+            <button class="sw" data-a="gsafe" data-k="toggle"><span>G-safe</span><em></em></button>
+            <button class="sw" data-a="esp" data-k="toggle"><span>ESP</span><em></em></button>
+            <button class="sw" data-a="speed_limiter" data-k="toggle"><span>Speed limiter</span><em></em></button>
+          </section>
+          <section class="pnl land">
+            <h4>Landing</h4>
+            <button class="lever" data-a="landing_gear" data-k="toggle" data-init="1"><span class="slot"><span class="knob"></span></span><b class="up">GEAR UP</b><b class="dn">GEAR DOWN</b></button>
+            <div class="tiles2">
+              <button class="tile" data-a="vtol" data-k="toggle">VTOL</button>
+              <button class="tile" data-a="request_landing">Request<br>landing</button>
+              <button class="tile hold" data-a="autoland" data-k="confirm">Autoland<small>hold</small></button>
+            </div>
+          </section>
+          <section class="pnl">
+            <h4>Docking & hatches</h4>
+            <div class="tiles2">
+              <button class="tile" data-a="request_docking">Request<br>docking</button>
+              <button class="tile" data-a="docking_camera" data-k="toggle">Docking<br>cam</button>
+            </div>
+            <button class="sw" data-a="doors" data-k="toggle"><span>Doors open</span><em></em></button>
+            <button class="sw" data-a="lock_doors" data-k="toggle"><span>Doors locked</span><em></em></button>
+          </section>
+        </div>
+      </div>
+      <div class="keycol">
+        <button class="k" data-a="headtrack_toggle" data-k="toggle">HEAD TRK<i></i></button>
+        <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
+        <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
+      </div>
+      <div></div><div class="keyrow"></div><div></div>
+    </div>
+  </main>
+
+  <!-- COMBAT -->
+  <main class="view" id="combat">
+    <div class="mfd frame">
+      <div></div>
+      <div class="keyrow">
+        <button class="k" data-a="scan_mode" data-k="toggle">SCAN MODE<i></i></button>
+        <button class="k" data-a="ping">PING<i></i></button>
+        <button class="k" data-a="missile_mode" data-k="toggle">MISSILES<i></i></button>
+        <button class="k" data-a="hail">HAIL<i></i></button>
+      </div>
+      <div></div>
+      <div class="keycol">
+        <button class="k ok" data-a="social_accept">ACCEPT<i></i></button>
+        <button class="k no" data-a="social_decline">DECLINE<i></i></button>
+        <button class="k" data-a="chat_toggle" data-k="toggle">CHAT<i></i></button>
+      </div>
+      <div class="screen">
+        <div class="shead"><span class="ttl">Combat</span><span class="chip">TGT</span><span class="ship shipName"></span></div>
+        <div class="sbody cb">
+          <section class="pnl">
+            <h4>Countermeasures</h4>
+            <button class="tile big warn" data-a="decoy">DECOY<small>launch burst</small></button>
+            <div class="stepper"><button class="k" data-a="decoy_burst_down" data-count="decoy:-1"><b>−</b></button><div class="readout"><b id="cnt-decoy">1</b><small>burst</small></div><button class="k" data-a="decoy_burst_up" data-count="decoy:1"><b>+</b></button></div>
+            <button class="tile big warn" data-a="noise">NOISE<small>deploy field</small></button>
+          </section>
+          <section class="pnl">
+            <h4>Targeting</h4>
+            <div class="radar">
+              <button class="rb n" data-a="target_hostiles">HOSTILES</button>
+              <button class="rb w" data-a="target_attackers">ATTACKERS</button>
+              <button class="rb e" data-a="target_friendlies">FRIENDLY</button>
+              <button class="rb s" data-a="target_all">ALL</button>
+              <button class="rc" data-a="target_forward">AHEAD</button>
+            </div>
+            <div class="pins">
+              <button class="tile" data-a="pin_1">PIN 1</button><button class="tile" data-a="pin_2">PIN 2</button><button class="tile" data-a="pin_3">PIN 3</button>
+              <button class="tile" data-a="pins_clear">CLEAR</button>
+            </div>
+            <button class="tile" data-a="target_unlock">Unlock target</button>
+          </section>
+          <section class="pnl">
+            <h4>Missiles</h4>
+            <div class="readout huge"><b id="cnt-missiles">1</b><small>armed</small></div>
+            <button class="tile big" data-a="missile_arm_more" data-count="missiles:1">ARM +1</button>
+            <button class="tile" data-a="missile_reset" data-set="missiles:1">Reset armed</button>
+          </section>
+        </div>
+      </div>
+      <div class="keycol">
+        <button class="k" data-a="headtrack_toggle" data-k="toggle">HEAD TRK<i></i></button>
+        <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
+        <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
+      </div>
+      <div></div><div class="keyrow"></div><div></div>
+    </div>
+  </main>
+
+  <!-- MINING -->
+  <main class="view" id="mining">
+    <div class="mfd frame">
+      <div></div>
+      <div class="keyrow">
+        <button class="k" data-a="mining_mode" data-k="toggle">MINING MODE<i></i></button>
+        <button class="k" data-a="scan_mode" data-k="toggle">SCAN<i></i></button>
+        <button class="k" data-a="ping">PING<i></i></button>
+        <button class="k" data-a="mining_gimbal" data-k="toggle">GIMBAL<i></i></button>
+      </div>
+      <div></div>
+      <div class="keycol">
+        <button class="k ok" data-a="social_accept">ACCEPT<i></i></button>
+        <button class="k no" data-a="social_decline">DECLINE<i></i></button>
+        <button class="k" data-a="chat_toggle" data-k="toggle">CHAT<i></i></button>
+      </div>
+      <div class="screen">
+        <div class="shead"><span class="ttl">Mining</span><span class="chip">PIT</span><span class="ship shipName"></span></div>
+        <div class="sbody mn">
+          <section class="pnl power">
+            <h4>Laser power</h4>
+            <div class="vslider" data-slider="mining" data-up="mining_power_up" data-down="mining_power_down">
+              <div class="track"><div class="fill"></div><div class="thumb"></div></div>
+              <div class="readout"><b class="sv">0</b><small>%</small></div>
+            </div>
+            <div class="stepper"><button class="k" data-nudge="mining:-1"><b>−</b></button><button class="k" data-nudge="mining:1"><b>+</b></button></div>
+          </section>
+          <section class="pnl fire">
+            <h4>Laser</h4>
+            <button class="trigger" data-a="mining_fire" data-k="latch"><span>FIRE</span><small>tap to start · tap to stop</small></button>
+            <div class="tiles2">
+              <button class="tile" data-a="mining_switch_laser">Switch<br>laser</button>
+              <button class="tile" data-a="mining_power_toggle" data-k="toggle">High / low<br>power</button>
+            </div>
+          </section>
+          <section class="pnl mods">
+            <h4>Consumables</h4>
+            <button class="module" data-a="mining_module_1" data-mod><b>1</b><span>Module 1</span><i></i></button>
+            <button class="module" data-a="mining_module_2" data-mod><b>2</b><span>Module 2</span><i></i></button>
+            <button class="module" data-a="mining_module_3" data-mod><b>3</b><span>Module 3</span><i></i></button>
+            <button class="tile danger hold" data-a="jettison_cargo" data-k="confirm">Jettison cargo<small>hold to confirm</small></button>
+          </section>
+        </div>
+      </div>
+      <div class="keycol">
+        <button class="k" data-a="headtrack_toggle" data-k="toggle">HEAD TRK<i></i></button>
+        <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
+        <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
+      </div>
+      <div></div>
+      <div class="keyrow">
+        <button class="k" data-zero="mining">RE-ZERO POWER<i></i></button>
+      </div>
+      <div></div>
+    </div>
+  </main>
+
+  <!-- SALVAGE -->
+  <main class="view" id="salvage">
+    <div class="mfd frame">
+      <div></div>
+      <div class="keyrow">
+        <button class="k" data-a="salvage_mode" data-k="toggle">SALVAGE MODE<i></i></button>
+        <button class="k" data-a="salvage_cycle_module">SALVAGE / TRACTOR<i></i></button>
+        <button class="k" data-a="salvage_gimbal" data-k="toggle">GIMBAL<i></i></button>
+        <button class="k" data-a="salvage_gimbal_reset">GIMBAL RESET<i></i></button>
+      </div>
+      <div></div>
+      <div class="keycol">
+        <button class="k ok" data-a="social_accept">ACCEPT<i></i></button>
+        <button class="k no" data-a="social_decline">DECLINE<i></i></button>
+        <button class="k" data-a="chat_toggle" data-k="toggle">CHAT<i></i></button>
+      </div>
+      <div class="screen">
+        <div class="shead"><span class="ttl">Salvage</span><span class="chip">SCRAPE</span><span class="ship shipName"></span></div>
+        <div class="sbody sv">
+          <section class="pnl heads">
+            <h4>Salvage heads</h4>
+            <div class="headrow">
+              <button class="head" data-a="salvage_beam_left" data-k="toggle" data-init="1"><span class="emit"></span>LEFT</button>
+              <div class="spacing"><div class="beams"><i></i><i></i></div><small>beam spacing <b class="sv">0</b>%</small></div>
+              <button class="head" data-a="salvage_beam_right" data-k="toggle" data-init="1"><span class="emit"></span>RIGHT</button>
+            </div>
+            <div class="hslider" data-slider="spacing" data-up="salvage_spacing_up" data-down="salvage_spacing_down">
+              <div class="track"><div class="fill"></div><div class="thumb"></div></div>
+            </div>
+            <div class="tiles4">
+              <button class="tile" data-a="salvage_focus_left">Focus<br>left</button>
+              <button class="tile" data-a="salvage_focus_all">Focus<br>all</button>
+              <button class="tile" data-a="salvage_focus_right">Focus<br>right</button>
+              <button class="tile" data-a="salvage_focus_fracture">Focus<br>fracture</button>
+            </div>
+          </section>
+          <section class="pnl fire">
+            <h4>Beam</h4>
+            <button class="trigger" data-a="salvage_fire" data-k="latch"><span>SCRAPE</span><small>tap to start · tap to stop</small></button>
+            <div class="tiles2">
+              <button class="tile" data-a="salvage_fracture" data-k="toggle">Fracture<br>head</button>
+              <button class="tile" data-a="salvage_disintegrate" data-k="toggle">Disintegrate<br>head</button>
+              <button class="tile" data-a="salvage_beam_axis">Beam<br>axis</button>
+              <button class="tile" data-zero="spacing">Re-zero<br>spacing</button>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="keycol">
+        <button class="k" data-a="headtrack_toggle" data-k="toggle">HEAD TRK<i></i></button>
+        <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
+        <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
+      </div>
+      <div></div><div class="keyrow"></div><div></div>
+    </div>
+  </main>
+
+  <!-- SETUP -->
+  <main class="view" id="setup">
+    <nav class="panel snav">
+      <div class="ptitle">Keybinds</div>
+      <button class="snb on" data-page="keys" data-cat="power">Power<span class="cnt"></span></button>
+      <button class="snb" data-page="keys" data-cat="flight">Flight<span class="cnt"></span></button>
+      <button class="snb" data-page="keys" data-cat="combat">Combat<span class="cnt"></span></button>
+      <button class="snb" data-page="keys" data-cat="mining">Mining<span class="cnt"></span></button>
+      <button class="snb" data-page="keys" data-cat="salvage">Salvage<span class="cnt"></span></button>
+      <button class="snb" data-page="keys" data-cat="comms">Comms &amp; seat<span class="cnt"></span></button>
+      <div class="ptitle">Settings</div>
+      <button class="snb" data-page="ship">Ship &amp; pips</button>
+      <button class="snb" data-page="sound">Sound &amp; haptics</button>
+      <button class="snb" data-page="conn">Connection</button>
+      <button class="snb" data-page="help">Help</button>
+    </nav>
+    <section class="panel scroll spages">
+      <div class="spage on" id="pg-keys">
+        <h3 id="keysTitle">Power keybinds</h3>
+        <p class="note">These must match <b>Options › Keybindings</b> in Star Citizen. Combine keys with + (for example <b>lalt+f5</b>). Leave blank for anything you have not bound in game. Dimmed rows come from your game settings.</p>
+        <table>
+          <thead><tr><th>Action</th><th>Keys</th><th>Mode</th><th>Hold ms</th></tr></thead>
+          <tbody id="bindRows"></tbody>
+        </table>
+        <div class="row sticky">
+          <button class="btn" id="saveBinds">Save keybinds<small>Writes to your PC</small></button>
+          <button class="btn" id="reloadBinds">Reload<small>From PC</small></button>
+        </div>
+      </div>
+      <div class="spage" id="pg-ship">
+        <h3>Ship &amp; pips</h3>
+        <p class="note">Pip counts differ by ship. Set them to what your ship's power screen shows.</p>
+        <div class="field"><label>Ship name</label><input id="pName" placeholder="e.g. Gladius"></div>
+        <div class="field"><label>Screen color</label><select id="pTheme">
+          <option value="auto">Auto (by manufacturer)</option>
+          <option value="#5cc8ff">Aegis blue</option><option value="#7de3b5">Anvil green</option>
+          <option value="#ffb547">Drake amber</option><option value="#e6edf2">Origin white</option>
+          <option value="#4fe0e0">RSI cyan</option><option value="#ff7a5c">Crusader red</option></select></div>
+        <div class="field"><label>Power plant pips</label><input type="number" min="1" max="60" id="pTotal"></div>
+        <table>
+          <thead><tr><th>System</th><th>Show</th><th>Min</th><th>Max</th><th>After reset</th></tr></thead>
+          <tbody id="sysRows"></tbody>
+        </table>
+        <div class="row"><button class="btn" id="saveProfile">Apply ship</button></div>
+      </div>
+      <div class="spage" id="pg-sound">
+        <h3>Sound &amp; haptics</h3>
+        <div class="field"><label>Play sounds on</label><select id="fbSound"><option value="ipad">This iPad</option><option value="pc">PC speakers</option><option value="both">Both</option><option value="off">Off</option></select></div>
+        <div class="field"><label>Volume</label><input type="range" min="0" max="1" step="0.05" id="fbVolume" style="padding:0"></div>
+        <div class="field"><label>Test sounds</label><button class="btn" id="testSound" style="min-height:0;padding:.5em">Play</button></div>
+        <p class="note" id="audioState"></p>
+        <div class="field"><label>Haptics (phones only, iPads have no vibration motor)</label><select id="fbHaptics"><option value="1">On</option><option value="0">Off</option></select></div>
+      </div>
+      <div class="spage" id="pg-conn">
+        <h3>Connection</h3>
+        <div class="field"><label>PIN (if you started the PC app with one)</label><input id="pin" autocomplete="off"></div>
+      </div>
+      <div class="spage" id="pg-help">
+        <h3>About the pips</h3>
+        <p class="note">Star Citizen doesn't send its power state to outside apps, so the dashboard keeps its own copy. It stays accurate as long as you change power from here. If they drift apart, either tap <b>SYNC</b> to set the ship to the dashboard's levels (it presses the power keys for you, so keep the game focused), or tap <b>MATCH</b> and tap the pips to copy what the game shows without sending keys.</p>
+        <h3>Sliders</h3>
+        <p class="note">Mining power and beam spacing are sent as mouse wheel notches. If a slider stops matching the game, tap <b>Re-zero</b>.</p>
+        <p class="note"><b>Tip:</b> In Safari, use Share › Add to Home Screen for a full-screen dashboard.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const SYSTEMS = [
+  {id:"weapons", min:1,     label:"Weapons",   short:"WPN",  max:6, reset:4, icon:'<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>'},
+  {id:"thrusters", min:1,   label:"Thrusters", short:"THR",  max:6, reset:4, icon:'<path d="M12 3l5 9h-3v9h-4v-9H7z"/>'},
+  {id:"shields", min:1,     label:"Shields",   short:"SHD",  max:6, reset:4, icon:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'},
+  {id:"quantum",     label:"Quantum",   short:"QTM",  max:2, reset:0, icon:'<circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="4" ry="10"/>'},
+  {id:"radar",       label:"Radar",     short:"RAD",  max:3, reset:1, icon:'<path d="M12 12L19 5"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>'},
+  {id:"lifesupport", label:"Life supp", short:"LIFE", max:2, reset:1, icon:'<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>'},
+  {id:"coolers",     label:"Cooler",    short:"CLR",  max:4, reset:2, icon:'<path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10"/>'},
+  {id:"coolers2",    label:"Cooler 2",  short:"CLR2", max:2, reset:2, extra:true, icon:'<path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10"/>'},
+  {id:"coolers3",    label:"Cooler 3",  short:"CLR3", max:2, reset:2, extra:true, icon:'<path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10"/>'},
+  {id:"coolers4",    label:"Cooler 4",  short:"CLR4", max:2, reset:2, extra:true, icon:'<path d="M12 2v20M3.5 7l17 10M20.5 7l-17 10"/>'},
+  {id:"tractor",     label:"Tractor",   short:"TRC",  max:2, reset:0, icon:'<path d="M12 3v9"/><path d="M6 12a6 6 0 0 0 12 0"/><path d="M4 18h16"/>'},
+];
+const SYSMAP = Object.fromEntries(SYSTEMS.map(x=>[x.id,x]));
+// The lowest level the game's power keys reach while a system is on; below that it has to be switched off.
+const minOf = s => profile.min?.[s] ?? SYSMAP[s].min ?? 0;
+// Pip limits players have confirmed in game, by ship class (the wiki's numbers don't always match).
+const SHIP_KNOWN = {
+  // Confirmed in game by Donn (4.10): defaults 2/2/2, quantum off, radar 3 (2 linked), life 1, coolers 2+2.
+  KRIG_L22_AlphaWolf: {total: 14, coolers: 2, tractor: false,
+    max: {weapons: 3, thrusters: 4, shields: 4, quantum: 2, radar: 5, lifesupport: 1, coolers: 2, coolers2: 2},
+    min: {radar: 2, lifesupport: 1, coolers: 1, coolers2: 1},
+    reset: {weapons: 2, thrusters: 2, shields: 2, quantum: 0, radar: 3, lifesupport: 1, coolers: 2, coolers2: 2}, off: ["quantum"]},
+};
+
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("scdash."+k); return v==null ? d : JSON.parse(v);}catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem("scdash."+k, JSON.stringify(v)); }catch{} }
+};
+
+function defaultProfile(){
+  return {name:"", total:22, show:SYSTEMS.filter(x=>!x.extra).map(x=>x.id), off:[],
+    min:Object.fromEntries(SYSTEMS.map(x=>[x.id,x.min||0])),
+    max:Object.fromEntries(SYSTEMS.map(x=>[x.id,x.max])), reset:Object.fromEntries(SYSTEMS.map(x=>[x.id,x.reset]))};
+}
+let profile = (()=>{ const d = defaultProfile(), p = store.get("profile", null);
+  if(!p) return d;
+  return {...d, ...p, show: p.show || d.show, min:{...d.min, ...p.min}, max:{...d.max, ...p.max}, reset:{...d.reset, ...p.reset}}; })();
+let state = (()=>{ const st = store.get("state", null) || {};
+  return {levels:{...profile.reset, ...(st.levels||{})}, sysOn:{...Object.fromEntries(SYSTEMS.map(x=>[x.id,true])), ...(st.sysOn||{})},
+    power: st.power ?? true, toggles: st.toggles || {},
+    counts: {decoy:1, ...(st.counts||{}), missiles: Math.max(1, st.counts?.missiles || 1)}, sliders: {mining:0, spacing:0, ...(st.sliders||{})}}; })();
+let binds = {};
+let ship = null, detect = false, shipKey = store.get("shipKey", "");
+let syncMode = false, showAnyway = false;
+let online = false;
+const SYS = () => profile.show.filter(id => SYSMAP[id]);
+const save = () => store.set("state", state);
+const used = () => SYS().reduce((a,s)=>a+(state.sysOn[s] && state.power ? state.levels[s] : 0),0);  // switched-off systems free their power
+const free = () => Math.max(0, profile.total - used());
+
+/* ---------- networking ---------- */
+async function api(path, body){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), 2500);
+  try{
+    const r = await fetch(path, {method: body ? "POST":"GET", signal: ctrl.signal,
+      headers: {"Content-Type":"application/json","X-Pin": store.get("pin","")},
+      body: body ? JSON.stringify(body) : undefined});
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw Object.assign(new Error(j.error || r.status), {code:r.status});
+    return j;
+  } finally { clearTimeout(t); }
+}
+
+async function press(action, count=1, st){
+  const b = binds[action];
+  if(b && !b.keys){ toast(`${b.label} has no key yet. Set it in Setup.`); return false; }
+  try{ await api("/api/press", st ? {action, count, state: st} : {action, count}); return true; }
+  catch(e){
+    toast(e.code===401 ? "Wrong PIN. Check Setup." : e.message==="unbound" ? "That action has no key yet." : "Can't reach the PC app.");
+    return false;
+  }
+}
+
+let appVersion = "";
+async function poll(){
+  try{
+    const s = await api("/api/status");
+    online = true;
+    // The PC app was updated while this page was open: load the new dashboard.
+    if(s.version && appVersion && s.version !== appVersion){ location.reload(); return; }
+    if(s.version && !appVersion){ appVersion = s.version; $("#appVer").textContent = s.version.replace(/-dev$/, ""); }
+    const dot = $("#dot"), txt = $("#linktext");
+    if(s.dryRun){ dot.className="dot warn"; txt.textContent="Linked · test mode"; }
+    else if(!s.gameFocused){ dot.className="dot warn"; txt.textContent="Linked · game not focused"; }
+    else { dot.className="dot ok"; txt.textContent="Linked · Star Citizen"; }
+    if(!Object.keys(binds).length) loadBinds();
+    detect = !!s.detect;
+    onShip(s.ship || null);
+    render();
+  }catch(e){
+    online = false; render();
+    $("#dot").className="dot"; $("#linktext").textContent = e.code===401 ? "PIN needed" : "Offline";
+  }
+}
+
+async function loadBinds(){
+  try{ binds = (await api("/api/binds")).actions || {}; renderBinds(); markUnbound(); }
+  catch{}
+}
+
+let toastT;
+function toast(msg, ok){
+  const t = $("#toast"); t.textContent = msg; t.className = "toast show" + (ok?" ok":"");
+  clearTimeout(toastT); toastT = setTimeout(()=>t.className="toast", 2200);
+}
+function flash(el){ el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),140); }
+
+/* ---------- power ---------- */
+function buildCols(){
+  const sys = SYS();
+  $("#cols").innerHTML = sys.map(id => { const x = SYSMAP[id]; return `
+    <div class="col" data-col="${id}">
+      <div class="val" id="lvl-${id}">0<span>/0</span></div>
+      <div class="pips" id="pips-${id}">${Array.from({length: profile.max[id]}, (_,i)=>`<div class="pip${minOf(id) > 1 && i < minOf(id) ? " lk" : ""}" data-sys="${id}" data-i="${i+1}"></div>`).join("")}</div>
+      <svg class="ico" viewBox="0 0 24 24">${x.icon}</svg>
+      <div class="lbl">${x.label}</div>
+      <div class="foot">
+        <button class="k pwrk" data-act="pwr_${id}_toggle" data-systoggle="${id}"><svg viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg><i></i></button>
+      </div>
+    </div>`; }).join("");
+  $("#jump").innerHTML = sys.map(id => `<button class="k" data-jump="${id}">${SYSMAP[id].short}<i></i></button>`).join("");
+  $("#cap").innerHTML = Array.from({length: profile.total}, ()=>'<div class="pip"></div>').join("");
+  applyTheme();
+  render();
+  markUnbound();
+}
+
+const MAKER_COLORS = {AEGS:"#5cc8ff", ANVL:"#7de3b5", DRAK:"#ffb547", ORIG:"#e6edf2", RSI:"#4fe0e0", CRUS:"#8fb8ff",
+  MISC:"#a6e36b", ARGO:"#ffd84a", CNOU:"#ff9a3c", ESPR:"#c79bff", BANU:"#e0a060", KRIG:"#ff7a5c", MRAI:"#f0f0f0",
+  GAMA:"#8fd0ff", TMBL:"#ffcf6b", XIAN:"#b0ff9a", XNAA:"#b0ff9a", GRIN:"#ffe066"};
+function applyTheme(){
+  const t = store.get("theme","auto");
+  document.documentElement.style.setProperty("--theme", t !== "auto" ? t : (MAKER_COLORS[ship?.maker] || "#5cc8ff"));
+}
+
+function jump(id){
+  const col = $(`.col[data-col="${id}"]`), strip = $("#cols");
+  if(!col) return;
+  strip.scrollTo({left: col.offsetLeft - strip.offsetLeft - (strip.clientWidth - col.offsetWidth)/2, behavior:"smooth"});
+  col.classList.add("ping"); setTimeout(()=>col.classList.remove("ping"), 700);
+}
+function page(dir){ const strip = $("#cols"); strip.scrollBy({left: dir * strip.clientWidth * .8, behavior:"smooth"}); }
+
+// A ship's power layout: game-confirmed values first, then the wiki (via the PC
+// app), then generic defaults. Starting levels the data doesn't give are filled in
+// the way ships usually spawn: coolers and life support full, radar one above its
+// minimum, quantum off, and what's left shared between weapons, thrusters and shields.
+function shipProfile(next){
+  const base = defaultProfile(), known = SHIP_KNOWN[next.class] || {}, p = next.power || {};
+  const nCool = known.coolers || p.coolers || 1;
+  const show = base.show.filter(id => !(id === "tractor" && (known.tractor === false || p.tractor === false)));
+  for(let i = 2; i <= nCool; i++) show.splice(show.indexOf("coolers") + i - 1, 0, "coolers" + i);
+  const prof = {...base, name: next.name, show,
+    total: known.total || p.total || base.total,
+    max: {...base.max, ...(p.max || {}), ...(known.max || {})},
+    min: {...base.min, ...(p.min || {}), ...(known.min || {})},
+    off: known.off || ["quantum"]};
+  if(known.reset){ prof.reset = {...base.reset, ...known.reset}; return prof; }
+  const r = {}, mn = id => prof.min[id] || 0;
+  show.forEach(id => r[id] = mn(id));
+  show.filter(id => id.startsWith("coolers") || id === "lifesupport").forEach(id => r[id] = prof.max[id]);
+  if(show.includes("radar")) r.radar = Math.min(prof.max.radar, mn("radar") + 1);
+  r.quantum = 0; r.tractor = 0;
+  let left = prof.total - show.reduce((a, id) => a + (prof.off.includes(id) ? 0 : r[id]), 0);
+  for(let pass = 0; left > 0 && pass < 20; pass++)
+    for(const id of ["weapons", "thrusters", "shields"]) if(left > 0 && r[id] < prof.max[id]){ r[id]++; left--; }
+  prof.reset = {...base.reset, ...r};
+  return prof;
+}
+
+// Per-ship pip settings, saved by ship class so manual edits stick.
+function onShip(next){
+  const key = next ? next.class + (next.power ? "+" : "") + "#" + (next.life || 0) : "";
+  const changed = (next?.class || "") !== (ship?.class || "");
+  if(changed) showAnyway = false;  // a new ship, or none (left seat, died): back to normal
+  ship = next;
+  if(changed) applyTheme();
+  if(!next) return;
+  if(key === shipKey){ if(changed) buildCols(); return; }  // same ship as last time: keep the pips
+  shipKey = key; store.set("shipKey", key);
+  const saved = store.get("ship2." + next.class, null);
+  profile = saved || shipProfile(next);
+  store.set("profile", profile);
+  state.levels = {...state.levels, ...profile.reset};
+  SYSTEMS.forEach(x => state.sysOn[x.id] = !(profile.off || []).includes(x.id));
+  buildCols();
+  if(changed) toast(`${next.name} detected.`, true);
+}
+
+function render(){
+  const f = free();
+  SYS().forEach(s => {
+    const lv = state.levels[s], mx = profile.max[s];
+    $("#lvl-"+s).innerHTML = state.sysOn[s] ? `${lv}<span>/${mx}</span>` : `OFF`;
+    const room = lv + f;
+    $$("#pips-"+s+" .pip").forEach(p => {
+      const i = +p.dataset.i;
+      p.classList.toggle("on", i <= lv);
+      p.classList.toggle("cap-off", i > room);
+    });
+    $(`.col[data-col="${s}"]`).classList.toggle("off", !state.sysOn[s] || !state.power);
+    $(`[data-systoggle="${s}"]`).classList.toggle("lit", state.sysOn[s]);
+    $(`[data-systoggle="${s}"]`).classList.toggle("alert", !state.sysOn[s]);
+  });
+  $$("#cap .pip").forEach((c,i)=>{ c.className = "pip " + (i < f ? "on" : "used"); });
+  $("#genVal").innerHTML = `${f}<span>/${profile.total}</span>`;
+  $("#fFree").textContent = f; $("#fUsed").textContent = used(); $("#fTotal").textContent = profile.total;
+  $("#shipName").textContent = ship ? ship.name : (profile.name || "Ship: not set");
+  $$(".shipName").forEach(e => e.textContent = ship ? ship.name : "");
+  $("#shipSrc").textContent = ship ? (ship.power ? "· ship data" : "· detected") : "";
+  const noLink = !online, noShip = online && detect && !ship && !showAnyway;
+  $("#colsPanel").classList.toggle("noship", noLink || noShip);
+  $("#emptyTitle").textContent = noLink ? "NO SIGNAL" : "NO SHIP";
+  $("#showAnyway").style.display = noLink ? "none" : "";
+  $("#emptyText").textContent = noLink ? "Start the PC app to connect" : "Board a ship to bring power online";
+  const pb = $("#powerBtn");
+  pb.classList.toggle("lit", state.power); pb.classList.toggle("alert", !state.power);
+  $("#colsPanel").classList.toggle("syncing", syncMode);
+  $("#matchBtn").classList.toggle("lit", syncMode);
+  save();
+}
+
+const bound = a => !!(binds[a] && binds[a].keys);
+
+/* ---------- sound & haptics ---------- */
+let actx = null;
+// iOS mutes Web Audio when the iPad is in Silent mode unless the page asks for
+// "playback" audio (Safari 16.4+). It also only lets audio start from a tap
+// (touchend/click, not touchstart), so the context is unlocked there.
+try{ if(navigator.audioSession) navigator.audioSession.type = "playback"; }catch{}
+function audio(){
+  if(!actx){ try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch{ return null; } }
+  if(actx.state !== "running") actx.resume().catch(()=>{});
+  return actx;
+}
+function unlockAudio(){
+  const a = audio(); if(!a) return;
+  const src = a.createBufferSource();  // a silent one-sample sound completes the unlock on iOS
+  src.buffer = a.createBuffer(1, 1, 22050); src.connect(a.destination); src.start(0);
+  loadSounds();
+}
+["touchend","click"].forEach(ev => document.addEventListener(ev, unlockAudio, {capture:true, passive:true}));
+// One short synthesized tone: frequency sweep f0 -> f1 over dur seconds.
+function tone(f0, f1, dur, type="sine", at=0, level=1){
+  const a = audio(); if(!a) return;
+  const vol = store.get("volume", 0.6) * level; if(!vol) return;
+  const t = a.currentTime + at, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25 * vol, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+// Sound set: WAV files made by make_sounds.py, served by the PC app. They play
+// on the iPad (Web Audio), through the PC's speakers (/api/sound), or both.
+const SOUNDS = ["click","tab","tick","deny","step_up","step_down","toggle_on","toggle_off","mode_on","mode_off",
+  "pwr_up","pwr_down","pwr_max","pwr_min","sys_on","sys_off","master_on","master_off","reset",
+  "boot","quantum","spool_down","brake","lights","gear_down","gear_up","servo","door","comms","autoland",
+  "decoy","noise_field","missile_arm","missile_reset","target","ping","scan","pin",
+  "laser_on","laser_off","scrape_on","scrape_off","module","jettison",
+  "accept","decline","chat","headtrack_on","headtrack_off","recenter","exit_seat"];
+const buffers = {};
+let soundsLoading = false;
+function loadSounds(){
+  const a = audio(); if(!a || soundsLoading) return;
+  soundsLoading = true;
+  SOUNDS.forEach(async n => {
+    try{
+      const ab = await (await fetch("sounds/" + n + ".wav")).arrayBuffer();
+      buffers[n] = await new Promise((ok, bad) => a.decodeAudioData(ab, ok, bad));
+    }catch{ soundsLoading = false; }
+  });
+}
+const soundOut = () => store.get("soundOut", store.get("sound", true) ? "ipad" : "off");
+const OLD_KIND = {up:"pwr_up", down:"pwr_down", max:"pwr_max", min:"pwr_min"};
+let lastPcTick = 0;
+function sfx(name, rate=1){
+  name = OLD_KIND[name] || name;
+  const out = soundOut(), vol = store.get("volume", 0.6);
+  if(out === "off" || !vol) return;
+  if(out === "pc" || out === "both"){
+    const now = performance.now();
+    if(name !== "tick" || now - lastPcTick > 70){ lastPcTick = now; api("/api/sound", {name, volume: vol}).catch(()=>{}); }
+  }
+  if(out === "ipad" || out === "both") playLocal(name, rate, vol);
+}
+function playLocal(name, rate, vol){
+  const a = audio(); if(!a) return;
+  const b = buffers[name];
+  if(!b){  // not loaded yet: a quick synthesized stand-in
+    loadSounds();
+    if(name === "deny") return tone(170, 140, 0.12, "square", 0, .35);
+    const up = /up|_on|max|arm|accept|boot/.test(name), down = /down|_off|min|decline/.test(name);
+    return up ? tone(700, 1050, 0.08) : down ? tone(560, 370, 0.08) : tone(2400, 1800, 0.025, "triangle", 0, .7);
+  }
+  const src = a.createBufferSource(), g = a.createGain();
+  src.buffer = b; src.playbackRate.value = rate; g.gain.value = vol;
+  src.connect(g).connect(a.destination); src.start();
+}
+
+// Which sound each control makes. [on, off] pairs are for toggles and latches.
+const SND = {
+  flight_ready:"boot", quantum_mode:["quantum","spool_down"], space_brake:"brake", lights:["lights","toggle_off"],
+  decoupled:["toggle_on","toggle_off"], cruise:["mode_on","mode_off"], gsafe:["toggle_on","toggle_off"], esp:["toggle_on","toggle_off"],
+  speed_limiter:["toggle_on","toggle_off"], landing_gear:["gear_down","gear_up"], vtol:"servo", request_landing:"comms",
+  autoland:"autoland", request_docking:"comms", docking_camera:["mode_on","mode_off"], doors:"door", lock_doors:["toggle_on","toggle_off"],
+  scan_mode:["scan","mode_off"], ping:"ping", missile_mode:["mode_on","mode_off"], hail:"comms",
+  decoy:"decoy", noise:"noise_field", decoy_burst_up:"step_up", decoy_burst_down:"step_down",
+  target_:"target", target_unlock:"missile_reset", pin_:"pin", pins_clear:"step_down",
+  missile_arm_more:"missile_arm", missile_reset:"missile_reset",
+  mining_mode:["mode_on","mode_off"], mining_fire:["laser_on","laser_off"], mining_switch_laser:"servo",
+  mining_power_toggle:["pwr_max","pwr_min"], mining_module_:"module", mining_gimbal:"servo", jettison_cargo:"jettison",
+  salvage_mode:["mode_on","mode_off"], salvage_fire:["scrape_on","scrape_off"], salvage_cycle_module:"mode_on",
+  salvage_gimbal:"servo", salvage_gimbal_reset:"servo", salvage_beam_axis:"servo", salvage_focus_:"target",
+  salvage_beam_left:["sys_on","sys_off"], salvage_beam_right:["sys_on","sys_off"],
+  salvage_fracture:["laser_on","laser_off"], salvage_disintegrate:["laser_on","laser_off"],
+  social_accept:"accept", social_decline:"decline", chat_toggle:"chat",
+  headtrack_toggle:["headtrack_on","headtrack_off"], headtrack_recenter:"recenter", exit_seat:"exit_seat",
+};
+function actionSound(a, kind){
+  if(binds[a] && !binds[a].keys) return "deny";
+  const key = a in SND ? a : Object.keys(SND).find(k => k.endsWith("_") && a.startsWith(k));
+  const e = SND[key];
+  // the sound for the state we're switching to
+  const turningOn = kind === "latch" ? !latched.has(a) : kind === "toggle" ? !isOn(a) : true;
+  if(Array.isArray(e)) return turningOn ? e[0] : e[1];
+  if(e) return e;
+  return kind === "toggle" ? (turningOn ? "toggle_on" : "toggle_off") : "click";
+}
+function soundFor(t){
+  const d = t.dataset;
+  if(t.classList.contains("pip") || d.inc || d.dec || d.nudge || d.k === "confirm") return null;
+  if(d.view || t.id === "pgPrev" || t.id === "pgNext") return "tab";
+  if(d.systoggle) return state.sysOn[d.systoggle] ? "sys_off" : "sys_on";
+  if(t.id === "powerBtn") return state.power ? "master_off" : "master_on";
+  if(t.id === "resetBtn") return "reset";
+  if(t.id === "matchBtn") return syncMode ? "toggle_off" : "toggle_on";
+  if(t.id === "syncBtn") return "reset";
+  if(d.zero) return null;
+  if(d.a) return actionSound(d.a, d.k || "tap");
+  if(t.id === "testSound") return null;
+  return "click";
+}
+// Android phones support vibrate(). iPhones (iOS 18+) give a light haptic when a
+// native switch control is toggled, so we toggle a hidden one. iPads have no
+// vibration hardware, so there is nothing to feel there.
+function haptic(){
+  if(!store.get("haptics", true)) return;
+  if(navigator.vibrate){ navigator.vibrate(12); return; }
+  const label = document.createElement("label"), input = document.createElement("input");
+  input.type = "checkbox"; input.setAttribute("switch", ""); label.setAttribute("aria-hidden", "true");
+  label.style.display = "none"; label.appendChild(input); document.head.appendChild(label);
+  label.click(); label.remove();
+}
+
+async function setLevel(s, target){
+  const mn = minOf(s);
+  // The game's power keys stop at the minimum; only the power button switches a system off.
+  if(!state.sysOn[s]){ toast(`${SYSMAP[s].label} is off. Tap its power button first.`); sfx("deny"); return; }
+  target = Math.max(mn, Math.min(target, profile.max[s], state.levels[s] + free()));
+  const diff = target - state.levels[s];
+  if(!diff){ if(target >= state.levels[s] && !free()){ sfx("deny"); toast("No free power. Lower another system first."); } return; }
+  sfx(diff > 0 ? "up" : "down", 0.85 + target / profile.max[s] * 0.35);
+  const prev = state.levels[s];
+  state.levels[s] = target; render();
+  const act = `pwr_${s}_${diff>0?"up":"down"}`;
+  if(syncMode || !bound(act)) return;  // no game key for this one: the dashboard just tracks it
+  const ok = await press(act, Math.abs(diff));
+  if(!ok){ state.levels[s] = prev; render(); }
+}
+
+async function setExtreme(s, max){
+  // Long-press: step all the way using single presses, which the game counts reliably.
+  sfx(max ? "max" : "min");
+  return setLevel(s, max ? profile.max[s] : minOf(s));
+}
+
+// SYNC: the game can't be read, so set the ship to the dashboard's levels instead.
+// Lowering a system past its minimum does nothing in game, so pressing "down" max
+// times always lands it on its minimum; then raise each one to its dashboard level.
+let pushing = false;
+async function pushToShip(btn){
+  if(pushing) return;
+  const sys = SYS().filter(s => state.sysOn[s] && bound(`pwr_${s}_down`) && bound(`pwr_${s}_up`));
+  if(!sys.length){ toast("No power keys are set. Check Setup › Keybinds › Power."); return; }
+  pushing = true; btn.classList.add("lit");
+  try{
+    for(const s of sys) if(!(await press(`pwr_${s}_down`, profile.max[s]))) return;
+    for(const s of sys){
+      const up = state.levels[s] - minOf(s);
+      if(up > 0 && !(await press(`pwr_${s}_up`, up))) return;
+    }
+    toast("Ship synced to the dashboard's power levels.", true);
+  } finally { pushing = false; btn.classList.remove("lit"); }
+}
+
+async function toggleSys(s){
+  if(syncMode || !bound(`pwr_${s}_toggle`) || await press(`pwr_${s}_toggle`)){ state.sysOn[s] = !state.sysOn[s]; render(); return true; }
+  return false;
+}
+
+function markUnbound(){
+  $$("[data-act],[data-a]").forEach(el => {
+    const b = binds[el.dataset.act || el.dataset.a];
+    el.classList.toggle("unbound", !!b && !b.keys);
+  });
+  if(Object.keys(binds).length) SYS().forEach(s => $(`.col[data-col="${s}"]`)?.classList.toggle("unb", !bound(`pwr_${s}_up`)));
+}
+
+/* ---------- setup ---------- */
+const CATS = {power:"Power", flight:"Flight", combat:"Combat", mining:"Mining", salvage:"Salvage", comms:"Comms & seat"};
+function catOf(id){
+  if(id.startsWith("pwr_")) return "power";
+  if(id.startsWith("mining_") || id === "jettison_cargo") return "mining";
+  if(id.startsWith("salvage_")) return "salvage";
+  if(/^(social_|chat_|exit_seat|headtrack_)/.test(id)) return "comms";
+  if(/^(decoy|noise|missile_|target_|pin_|pins_|hail|scan_mode|ping)/.test(id)) return "combat";
+  return "flight";
+}
+let bindCat = "power";
+function showBindCat(cat){
+  bindCat = cat;
+  $$("#bindRows tr").forEach(tr => tr.hidden = catOf(tr.dataset.id) !== cat);
+  $("#keysTitle").textContent = CATS[cat] + " keybinds";
+}
+function countUnbound(){
+  $$('.snb[data-cat]').forEach(b => {
+    const n = Object.entries(binds).filter(([id, x]) => catOf(id) === b.dataset.cat && !x.keys).length;
+    $(".cnt", b).textContent = n ? n + " unbound" : "";
+  });
+}
+function renderBinds(){
+  $("#bindRows").innerHTML = Object.entries(binds).map(([id,b]) => `
+    <tr data-id="${id}"${b.fromGame ? ' class="fromGame"' : ""}>
+      <td>${b.label}${b.fromGame ? '<br><small class="note">from your game settings</small>' : ""}</td>
+      <td class="k"><input value="${b.keys||""}" data-f="keys" autocapitalize="off" autocorrect="off" spellcheck="false"${b.fromGame ? " disabled" : ""}></td>
+      <td class="m"><select data-f="mode">${["tap","hold","double"].map(m=>`<option${m===b.mode?" selected":""}>${m}</option>`).join("")}</select></td>
+      <td class="h"><input type="number" value="${b.holdMs||""}" data-f="holdMs" placeholder="—"></td>
+    </tr>`).join("");
+  showBindCat(bindCat); countUnbound();
+}
+
+function fillProfile(){
+  $("#pTotal").value = profile.total;
+  $("#sysRows").innerHTML = SYSTEMS.map(x => `
+    <tr data-id="${x.id}"><td>${x.label}</td>
+      <td><input type="checkbox" data-f="show" ${profile.show.includes(x.id)?"checked":""} style="width:auto;min-height:0;transform:scale(1.5)"></td>
+      <td><input type="number" min="0" max="20" data-f="min" value="${minOf(x.id)}"></td>
+      <td><input type="number" min="1" max="20" data-f="max" value="${profile.max[x.id]}"></td>
+      <td><input type="number" min="0" max="20" data-f="reset" value="${profile.reset[x.id]}"></td></tr>`).join("");
+  $("#pin").value = store.get("pin","");
+  $("#pName").value = profile.name || "";
+  $("#pTheme").value = store.get("theme","auto");
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", async e => {
+  if(longFired){ longFired = false; return; }
+  const t = e.target.closest("button, .pip, .st");
+  if(!t) return;
+  if(t.matches("button")) flash(t);
+  const d = t.dataset;
+  const snd = soundFor(t); if(snd) sfx(snd);
+  haptic();
+
+  if(d.page){
+    $$(".snb").forEach(x => x.classList.toggle("on", x === t));
+    $$(".spage").forEach(p => p.classList.toggle("on", p.id === "pg-" + d.page));
+    if(d.cat) showBindCat(d.cat);
+    $(".spages").scrollTop = 0;
+    return;
+  }
+  if(d.view){
+    $$(".tab").forEach(x=>x.classList.toggle("on", x===t));
+    $$(".view").forEach(v=>v.classList.toggle("on", v.id===d.view));
+    if(d.view==="setup") fillProfile();
+    return;
+  }
+  if(t.classList.contains("pip")) return;  // pips are handled by the column drag below
+  if(d.jump) return jump(d.jump);
+  if(d.systoggle) return toggleSys(d.systoggle);
+  if(d.inc) return setLevel(d.inc, state.levels[d.inc]+1);
+  if(d.dec) return setLevel(d.dec, state.levels[d.dec]-1);
+  if(t.id==="pgPrev") return page(-1);
+  if(t.id==="pgNext") return page(1);
+  if(t.id==="powerBtn"){
+    if(syncMode || await press("pwr_all")){ state.power = !state.power; render(); }
+    return;
+  }
+  if(t.id==="resetBtn"){
+    if(syncMode || await press("pwr_reset")){ state.levels = {...state.levels, ...profile.reset}; render(); }
+    return;
+  }
+  if(t.id==="showAnyway"){ showAnyway = true; render(); return; }
+  if(t.id==="matchBtn"){
+    syncMode = !syncMode; render();
+    if(syncMode){ toast("Match mode: tap the pips to copy what the game shows. No keys are sent. Tap Match again when done.", true); return; }
+    // Leaving Match mode: what was just copied from the game becomes this ship's default.
+    SYS().forEach(id => { profile.reset[id] = state.sysOn[id] ? state.levels[id] : profile.reset[id]; });
+    store.set("profile", profile);
+    if(ship) store.set("ship2." + ship.class, profile);
+    toast(`Saved as the default for ${ship ? ship.name : "this ship"}.`, true);
+    return;
+  }
+  if(t.id==="syncBtn") return pushToShip(t);
+  if(d.zero) return rezero(d.zero);
+  if(d.nudge){ const [n, by] = d.nudge.split(":"); sfx(+by > 0 ? "step_up" : "step_down"); return setSlider(n, state.sliders[n] + +by); }
+  if(d.a) return screenAction(t);
+  if(t.id==="saveBinds"){
+    const next = structuredClone(binds);
+    $$("#bindRows tr").forEach(tr => {
+      const b = next[tr.dataset.id];
+      b.keys = $("[data-f=keys]", tr).value.trim().toLowerCase().replace(/\s+/g,"");
+      b.mode = $("[data-f=mode]", tr).value;
+      const h = parseInt($("[data-f=holdMs]", tr).value, 10);
+      if(h > 0) b.holdMs = h; else delete b.holdMs;
+    });
+    try{ await api("/api/binds", {actions: next}); binds = next; markUnbound(); countUnbound(); render(); toast("Keybinds saved on your PC.", true); }
+    catch(err){ toast(online ? "Not saved: " + err.message : "Can't reach the PC app."); }
+    return;
+  }
+  if(t.id==="testSound"){
+    ["pwr_up","pwr_down","click","laser_on","accept"].forEach((k,i)=>setTimeout(()=>sfx(k), i*450));
+    setTimeout(()=>{ $("#audioState").textContent = `Audio: ${actx ? actx.state : "unavailable"}` +
+      (navigator.audioSession ? ` · session: ${navigator.audioSession.type}` : " · no audio session support (iPadOS 16.4+ needed to ignore Silent mode)"); }, 400);
+    return;
+  }
+  if(t.id==="reloadBinds"){ await loadBinds(); toast("Reloaded keybinds.", true); return; }
+  if(t.id==="saveProfile"){
+    const num = (v, lo) => Math.max(lo, parseInt(v,10) || 0);
+    store.set("theme", $("#pTheme").value);
+    const next = {name: $("#pName").value.trim(), total: num($("#pTotal").value, 1), show:[], min:{}, max:{}, reset:{}};
+    $$("#sysRows tr").forEach(tr => {
+      const id = tr.dataset.id;
+      if($("[data-f=show]", tr).checked) next.show.push(id);
+      next.max[id] = num($("[data-f=max]", tr).value, 1);
+      next.min[id] = Math.min(num($("[data-f=min]", tr).value, 0), next.max[id]);
+      next.reset[id] = Math.max(next.min[id], Math.min(num($("[data-f=reset]", tr).value, 0), next.max[id]));
+      state.levels[id] = Math.min(state.levels[id], next.max[id]);
+    });
+    if(!next.show.length) next.show = ["weapons"];
+    profile = next;
+    if(ship) store.set("ship2." + ship.class, profile);
+    store.set("profile", profile); buildCols(); toast("Ship applied.", true);
+    return;
+  }
+});
+let longFired = false, longT;
+
+/* Pip columns: tap or drag anywhere in a column to set its level. Below the
+   first pip (or the lower part of it) means 0; above the top pip means full. */
+let pipDrag = null;
+function levelAt(s, y){
+  let lv = 0;
+  $$("#pips-" + s + " .pip").forEach(p => { const r = p.getBoundingClientRect(); if(y <= r.bottom - r.height * .4) lv = Math.max(lv, +p.dataset.i); });
+  return lv;
+}
+document.addEventListener("pointerdown", e => {
+  const col = e.target.closest(".strip .pips");
+  if(!col) return;
+  const s = col.id.slice(5), from = state.levels[s];
+  let lv = levelAt(s, e.clientY);
+  if(lv === from && e.target.closest(".pip")) lv = from - 1;  // tapping the top lit pip lowers by one
+  pipDrag = {s, from, lv, room: from + free()};
+  preview(lv);
+});
+function preview(lv){
+  const d = pipDrag;
+  d.lv = Math.max(0, Math.min(lv, profile.max[d.s], d.room));
+  state.levels[d.s] = d.lv; render();
+}
+document.addEventListener("pointermove", e => { if(pipDrag) preview(levelAt(pipDrag.s, e.clientY)); });
+document.addEventListener("pointerup", () => {
+  if(!pipDrag) return;
+  const {s, from, lv} = pipDrag; pipDrag = null;
+  state.levels[s] = from;
+  haptic();
+  setLevel(s, lv);
+});
+document.addEventListener("pointercancel", () => { if(pipDrag){ state.levels[pipDrag.s] = pipDrag.from; pipDrag = null; render(); } });
+
+/* ---------- tailored screens (flight, combat, mining, salvage, rail) ---------- */
+const COUNTS = {decoy:[1,10], missiles:[1,12]};
+const SLIDERS = {mining:20, spacing:20};          // wheel notches from 0 to full
+const latched = new Set();
+const initOn = a => !!$(`[data-a="${a}"][data-init="1"]`);
+const isOn = a => state.toggles[a] ?? initOn(a);
+
+function paintScreens(){
+  $$('[data-a][data-k="toggle"]').forEach(el => el.classList.toggle("lit", isOn(el.dataset.a)));
+  $$('[data-k="latch"]').forEach(el => el.classList.toggle("lit", latched.has(el.dataset.a)));
+  for(const [n] of Object.entries(COUNTS)){ const el = $("#cnt-" + n); if(el) el.textContent = state.counts[n]; }
+  for(const [n, steps] of Object.entries(SLIDERS)){
+    const v = state.sliders[n], pct = Math.round(v / steps * 100), sl = $(`[data-slider="${n}"]`);
+    if(!sl) continue;
+    sl.style.setProperty("--v", pct + "%");
+    const pnl = sl.closest(".pnl");
+    pnl.style.setProperty("--s", v / steps);
+    $$(".sv", pnl).forEach(e => e.textContent = pct);
+  }
+}
+
+// Send queued wheel notches in small batches so dragging a slider stays smooth.
+const pending = {}, flushT = {};
+function queueTicks(n, diff){
+  pending[n] = (pending[n] || 0) + diff;
+  clearTimeout(flushT[n]);
+  flushT[n] = setTimeout(async () => {
+    const d = pending[n]; pending[n] = 0;
+    if(!d) return;
+    const sl = $(`[data-slider="${n}"]`);
+    if(!(await press(sl.dataset[d > 0 ? "up" : "down"], Math.abs(d)))){ state.sliders[n] -= d; paintScreens(); save(); }
+  }, 90);
+}
+function setSlider(n, v){
+  v = Math.max(0, Math.min(SLIDERS[n], v));
+  const diff = v - state.sliders[n];
+  if(!diff) return;
+  state.sliders[n] = v; paintScreens(); save();
+  if(!syncMode) queueTicks(n, diff);
+}
+async function rezero(n){
+  const sl = $(`[data-slider="${n}"]`);
+  if(syncMode || await press(sl.dataset.down, SLIDERS[n])){ state.sliders[n] = 0; paintScreens(); save(); sfx("min"); toast("Re-zeroed. The game is at its lowest setting now.", true); }
+}
+
+let drag = null;
+document.addEventListener("pointerdown", e => {
+  const tr = e.target.closest("[data-slider] .track");
+  if(!tr) return;
+  const n = tr.parentElement.dataset.slider;
+  drag = {tr, n, from: state.sliders[n], vert: !!tr.closest(".vslider")};
+  tr.setPointerCapture?.(e.pointerId);
+  dragTo(e);
+});
+function dragTo(e){
+  const r = drag.tr.getBoundingClientRect(), steps = SLIDERS[drag.n];
+  const f = drag.vert ? 1 - (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width;
+  setSlider(drag.n, Math.round(Math.max(0, Math.min(1, f)) * steps));
+}
+document.addEventListener("pointermove", e => { if(drag) dragTo(e); });
+["pointerup","pointercancel"].forEach(ev => document.addEventListener(ev, () => { if(drag){ const d = state.sliders[drag.n] - drag.from; if(d) sfx(d > 0 ? "step_up" : "step_down"); haptic(); drag = null; } }));
+
+// Hold-to-confirm buttons (autoland, jettison, exit seat).
+let confT, confEl;
+document.addEventListener("pointerdown", e => {
+  longFired = false;
+  const c = e.target.closest('[data-k="confirm"]');
+  if(!c) return;
+  confEl = c; c.classList.add("arming");
+  confT = setTimeout(() => { longFired = true; c.classList.remove("arming"); flash(c); sfx(actionSound(c.dataset.a, "tap")); haptic(); press(c.dataset.a); }, 700);
+});
+["pointerup","pointercancel"].forEach(ev => document.addEventListener(ev, () => { clearTimeout(confT); confEl?.classList.remove("arming"); confEl = null; }));
+
+async function latch(t){
+  const a = t.dataset.a, on = !latched.has(a);
+  if(syncMode || await press(a, 1, on ? "down" : "up")){ on ? latched.add(a) : latched.delete(a); paintScreens(); }
+}
+function releaseLatches(){ latched.forEach(a => press(a, 1, "up")); latched.clear(); paintScreens(); }
+document.addEventListener("visibilitychange", () => { if(document.hidden) releaseLatches(); });
+window.addEventListener("pagehide", releaseLatches);
+
+async function screenAction(t){
+  const d = t.dataset, a = d.a, kind = d.k || "tap";
+  if(kind === "confirm"){ toast("Hold to confirm."); return; }
+  if(kind === "latch") return latch(t);
+  if(!syncMode && !(await press(a))) return;
+  if(d.count){ const [n, by] = d.count.split(":"), [lo, hi] = COUNTS[n]; state.counts[n] = Math.max(lo, Math.min(hi, state.counts[n] + +by)); }
+  if(d.set){ const [n, v] = d.set.split(":"); state.counts[n] = +v; }
+  if("mod" in d){ t.classList.add("used"); setTimeout(() => t.classList.remove("used"), 1800); }
+  if(kind === "toggle") state.toggles[a] = !isOn(a);
+  save(); paintScreens();
+}
+document.addEventListener("pointerdown", e => {
+  const k = e.target.closest("[data-inc],[data-dec]");
+  if(!k) return;
+  longT = setTimeout(() => { longFired = true; flash(k); haptic();
+    k.dataset.inc ? setExtreme(k.dataset.inc, true) : setExtreme(k.dataset.dec, false); }, 550);
+});
+["pointerup","pointercancel","pointerleave"].forEach(ev => document.addEventListener(ev, () => clearTimeout(longT)));
+document.addEventListener("contextmenu", e => { if(e.target.closest(".mfd")) e.preventDefault(); });
+$("#fbSound").value = soundOut();
+$("#fbHaptics").value = store.get("haptics", true) ? "1" : "0";
+$("#fbVolume").value = store.get("volume", 0.6);
+$("#fbSound").addEventListener("change", e => { store.set("soundOut", e.target.value); sfx("toggle_on"); });
+$("#fbHaptics").addEventListener("change", e => { store.set("haptics", e.target.value === "1"); haptic(); });
+$("#fbVolume").addEventListener("change", e => { store.set("volume", +e.target.value); sfx("up"); });
+$("#pin").addEventListener("change", e => { store.set("pin", e.target.value.trim()); poll(); });
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("dblclick", e => e.preventDefault(), {passive:false});
+
+buildCols(); fillProfile(); paintScreens();
+poll(); setInterval(poll, 2000);
+})();
+</script>
+</body>
+</html>
