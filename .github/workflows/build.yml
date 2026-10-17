@@ -1,11 +1,11 @@
 name: Build
 
-# Every push builds the Windows installer as a downloadable artifact.
-# Pushing a tag like v1.2.3 also publishes it as a GitHub Release, which the tray app updates from.
+# Every push builds and tests the Windows installer.
+# On main, when the number in VERSION has no release yet, it is published as a GitHub Release
+# (tag v<VERSION>), which the tray app updates from. So to release: bump VERSION, update CHANGES.md, push.
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ jobs:
         id: ver
         shell: bash
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.${GITHUB_RUN_NUMBER}"; fi
+          V="$(tr -d '[:space:]' < VERSION)"
           python scripts/set_version.py "$V"
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
@@ -85,8 +85,15 @@ jobs:
           path: dist/*-Setup.exe
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
-        run: gh release create "$GITHUB_REF_NAME" dist/*-Setup.exe --title "SC Dashboard ${{ steps.ver.outputs.version }}" --notes-file CHANGES.md
+        run: |
+          TAG="v${{ steps.ver.outputs.version }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "$TAG is already released; bump VERSION to publish a new one."
+          else
+            gh release create "$TAG" dist/*-Setup.exe --target "$GITHUB_SHA" \
+              --title "SC Dashboard ${{ steps.ver.outputs.version }}" --notes-file CHANGES.md
+          fi

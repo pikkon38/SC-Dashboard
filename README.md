@@ -21,7 +21,7 @@ Install Python 3, then double-click **Start SC Dashboard.bat** (runs the compani
 
 ### Publishing a release
 
-Write the notes in `CHANGES.md`, then push a tag: `git tag v1.2.3 && git push origin v1.2.3`. GitHub Actions builds the installer on Windows and publishes the release.
+Bump the number in `VERSION`, write the notes in `CHANGES.md`, and push to main. GitHub Actions builds and tests the installer on Windows and publishes it as release v<VERSION>.
 
 ## Screens
 
