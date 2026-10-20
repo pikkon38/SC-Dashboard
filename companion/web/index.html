@@ -31,8 +31,10 @@ body{background:
   repeating-linear-gradient(0deg, transparent 0 3px, rgba(67,217,240,.025) 3px 4px), var(--bg)}
 button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
 .app{height:100dvh;display:grid;grid-template-rows:auto 1fr;padding:
-  max(var(--gap),env(safe-area-inset-top)) max(var(--gap),env(safe-area-inset-right))
+  calc(env(safe-area-inset-top) + var(--gap)) max(var(--gap),env(safe-area-inset-right))
   max(var(--gap),env(safe-area-inset-bottom)) max(var(--gap),env(safe-area-inset-left));gap:var(--gap)}
+/* Opened from the Home Screen, the iPad's clock and battery sit over the page; keep the tabs below them. */
+@media (display-mode: standalone){ .app{padding-top:calc(max(env(safe-area-inset-top), 24px) + var(--gap))} }
 
 /* top bar */
 .top{display:flex;align-items:center;gap:var(--gap)}
