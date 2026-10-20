@@ -1,1 +1,1 @@
-- When the dashboard is opened from the iPad Home Screen, the tabs now sit below the iPad's clock and battery instead of underneath them.
+- In Home Screen mode the tabs sit further below the iPad's clock and battery, so they no longer look fuzzy at the top.
