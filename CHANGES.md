@@ -1,1 +1,1 @@
-- In Home Screen mode the tabs sit further below the iPad's clock and battery, so they no longer look fuzzy at the top.
+- The top bar has a solid dark background up to the top edge of the iPad, with no glow or scan lines behind the tabs.
