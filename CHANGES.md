@@ -1,6 +1,4 @@
-Easier power controls.
+Clearer − / + power buttons.
 
-- Power: every system now has − and + buttons under its pip stack, so you don't have to hit the right pip. Hold them to jump to min or max.
-- Phones held sideways: the pip stacks are replaced by large − and + buttons.
-- New setting, Setup › Ship & pips › Power controls: "Simplified" uses only the − and + buttons on every screen.
-- The free power column no longer runs off the bottom on small screens.
+- With the big − and + buttons (phones held sideways, or Simplified power controls), each system's name now sits large on top so you can see at a glance what you're changing.
+- Phones held sideways: the pip count and icons are hidden to give the buttons more room. Free/used totals stay in the footer.

@@ -154,15 +154,22 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .mfd .col .steps .k b{font-size:calc(var(--u)*1.7)}
 .col.gen .pips,.col .pips{overflow:hidden}
 .pip{min-height:2px}
+/* simplified: name on top so you can tell at a glance what each − / + changes */
 body.psimple .strip .pips{display:none}
-body.psimple .col .steps{grid-row:2;flex-direction:column-reverse;align-self:stretch;padding:0}
-body.psimple .mfd .col .steps .k{min-height:calc(var(--u)*4.5);flex:1}
+body.psimple .col{grid-template-rows:auto auto auto minmax(0,1fr) auto}
+body.psimple .col .ico{grid-row:1}
+body.psimple .col .lbl{grid-row:2;font-size:calc(var(--u)*1.35);font-weight:700;letter-spacing:.12em;color:var(--m);text-shadow:0 0 8px var(--m2);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+body.psimple .col .val{grid-row:3;font-size:calc(var(--u)*2)}
+body.psimple .col .steps{grid-row:4;flex-direction:column-reverse;align-self:stretch;padding:0;min-height:calc(var(--u)*6)}
+body.psimple .col .foot{grid-row:5}
+body.psimple .mfd .col .steps .k{min-height:0;flex:1}
 body.psimple .mfd .col .steps .k b{font-size:calc(var(--u)*3)}
-body.psimple .col .val{font-size:calc(var(--u)*3)}
-body.psimple .col .steps{min-height:calc(var(--u)*6)}
-body.psimple .mfd .col .steps .k{min-height:0}
-body.psimple .col .val{margin-bottom:calc(var(--u)*1.1)}
-body.psimple .col.unb::before{top:calc(var(--u)*3.9)}
+body.psimple .col.unb::before{display:none}
+body.psimple .col.unb .lbl::after{content:"TRACK ONLY";display:block;font-size:.55em;font-weight:400;letter-spacing:.2em;color:var(--warn);text-shadow:none}
+body.psimple .col .lbl{min-height:calc(var(--u)*1.35*1.25*1.7)}
+/* short screens (phones held sideways): no room for the count or the icon */
+body.pshort .col .val,body.pshort .col .ico{display:none}
 .col.unb::before{content:"TRACK ONLY";position:absolute;left:0;right:0;top:calc(var(--u)*4.1);font-size:calc(var(--u)*.7);letter-spacing:.2em;color:var(--warn);text-align:center;pointer-events:none}
 .shead .src{color:var(--m2)}
 .empty{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*1.2);
@@ -1619,7 +1626,7 @@ document.addEventListener("dblclick", e => e.preventDefault(), {passive:false});
 // Simplified power controls: always in the setting's "simple" mode, and automatically when the
 // screen is too short for pip stacks to be tapped reliably.
 const shortMQ = matchMedia("(max-height: 560px)");
-function applyPowerMode(){ document.body.classList.toggle("psimple", store.get("powerSimple","auto") === "simple" || shortMQ.matches); }
+function applyPowerMode(){ document.body.classList.toggle("psimple", store.get("powerSimple","auto") === "simple" || shortMQ.matches); document.body.classList.toggle("pshort", shortMQ.matches); }
 shortMQ.addEventListener?.("change", applyPowerMode);
 $("#pSimple").value = store.get("powerSimple","auto");
 $("#pSimple").addEventListener("change", e => { store.set("powerSimple", e.target.value); applyPowerMode(); });
