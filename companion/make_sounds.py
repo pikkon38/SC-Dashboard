@@ -243,6 +243,13 @@ S["recenter"] = lambda: echo(mix(*[(blip(1200, .03, "triangle", .55), .05 * k) f
 S["exit_seat"] = lambda: echo(mix(relay(.7), (hiss(.6, 6000, 1200, .55), .03), (thud(60, .3, .8), .1),
                                   (gain(swell(lowpass(osc("saw", 140, 70, .5), 600), .1), .35), .1)), .12, .3, .35, .45)
 
+# emergency: a two-tone klaxon when self destruct arms, a falling all-clear when it's cancelled, a blast for eject
+S["alarm"] = lambda: echo(mix(*[(lowpass(env(osc("saw", f, f, .17), .004, 1.2, .1), 2600, 1800), .19 * k)
+                                for k, f in enumerate((880, 660, 880, 660))]), .1, .25, .3, .3)
+S["sd_cancel"] = lambda: echo(mix(bell(990, .25, .7), (bell(660, .3, .7), .1), (bell(440, .4, .7), .2)), .12, .3, .35, .4)
+S["eject"] = lambda: echo(mix(thud(45, .45, 1), relay(.8), (hiss(.7, 9000, 700, .8), .02),
+                              (gain(lowpass(osc("saw", 90, 40, .5), 500), .4), .03)), .14, .3, .35, .5)
+
 
 def write(name, sig):
     peak = max(1e-6, max(abs(x) for x in sig))

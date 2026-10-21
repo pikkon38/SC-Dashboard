@@ -525,6 +525,9 @@ GAME_ACTIONS = {
     "lights": "v_lights",
     "doors": "v_toggle_all_doors",
     "lock_doors": "v_toggle_all_doorlocks",
+    # from community bind lists; not yet seen in Donn's own actionmaps.xml
+    "eject": "v_eject",
+    "self_destruct": "v_self_destruct",
 }
 SC_KEY_NAMES = {"escape": "esc", "np_add": "np+", "np_subtract": "np-", "np_multiply": "np*", "np_divide": "np/",
                 "np_enter": "npenter", "np_period": "np.", "pageup": "pgup", "pagedown": "pgdn"}

@@ -1,6 +1,6 @@
 # Star Citizen Dashboard
 
-A touch dashboard for your iPad that controls Star Citizen on your Windows PC. Power distribution (pips) is the main screen. Flight, Combat, Mining and Salvage each have their own screen, and every screen except Setup has Accept, Decline, Chat, head tracking and Exit Seat in the side key columns of its frame.
+A touch dashboard for your iPad (or any tablet or phone) that controls Star Citizen on your Windows PC. Power distribution (pips) is the main screen. Flight, Combat, Mining and Salvage each have their own screen, and every screen except Setup has Accept, Decline, Chat, head tracking and Exit Seat in the side key columns of its frame.
 
 ## Install
 
@@ -25,8 +25,9 @@ Bump the number in `VERSION`, write the notes in `CHANGES.md`, and push to main.
 
 ## Screens
 
-- **Flight**: decoupled, cruise, G-safe, ESP and speed limiter switches, a landing gear lever, VTOL, request landing, autoland (hold), docking and doors.
-- **Combat**: decoys with burst size, noise, a targeting wheel (hostiles, attackers, friendlies, all, ahead), pin slots and missile arming.
+- **Flight**: decoupled, cruise, G-safe, ESP, speed limiter and pitch/yaw lock switches, a landing gear lever, VTOL, request landing, autoland (hold), docking, port lock, cargo loading, and small cabin buttons (doors, locks, wipe visor). The red emergency keys along the bottom are Emergency exit, Eject and Self destruct (all hold).
+- **Self destruct**: once it's armed the whole screen pulses red on every tab, with a Hold to cancel button. The game doesn't report self destruct, so the dashboard tracks its own press: the alarm stops when you cancel, leave the seat, die, or after 3 minutes. Self destruct started from your stick doesn't show.
+- **Combat**: decoys with burst size, noise and panic launch; a targeting wheel (hostiles, attackers, friendlies, all, ahead), lock and pin slots, sub-targets, auto targeting and look ahead; weapon presets, gimbal lock, precision targeting, staggered fire and aim mode; and missile arming.
 - **Mining**: a laser power slider, a Fire button, laser switch, high/low power, consumable modules 1 to 3, and jettison cargo (hold).
 - **Salvage**: left and right heads, beam spacing slider, head focus, Scrape button, fracture and disintegrate heads.
 - Buttons marked "hold" need a press of about a second so they can't fire by accident.

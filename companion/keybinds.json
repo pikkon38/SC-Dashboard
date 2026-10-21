@@ -519,6 +519,118 @@
       "label": "Beam axis",
       "keys": "lalt+rmb",
       "mode": "tap"
+    },
+    "lock_pitch_yaw": {
+      "label": "Lock pitch & yaw",
+      "keys": "rshift",
+      "mode": "tap"
+    },
+    "port_lock_all": {
+      "label": "Port lock (all)",
+      "keys": "ralt+k",
+      "mode": "tap"
+    },
+    "request_cargo": {
+      "label": "Request cargo loading",
+      "keys": "ralt+n",
+      "mode": "tap"
+    },
+    "wipe_visor": {
+      "label": "Wipe visor",
+      "keys": "lalt+x",
+      "mode": "tap"
+    },
+    "eject": {
+      "label": "Eject",
+      "keys": "ralt+y",
+      "mode": "tap"
+    },
+    "self_destruct": {
+      "label": "Self destruct",
+      "keys": "backspace",
+      "mode": "hold",
+      "holdMs": 1500
+    },
+    "emergency_exit": {
+      "label": "Emergency exit seat",
+      "keys": "lshift+u",
+      "mode": "tap"
+    },
+    "gimbal_toggle": {
+      "label": "Gimbal lock",
+      "keys": "g",
+      "mode": "tap"
+    },
+    "aim_mode": {
+      "label": "Aim mode (cycle)",
+      "keys": "ralt+g",
+      "mode": "tap"
+    },
+    "weapon_preset_next": {
+      "label": "Weapon preset next",
+      "keys": "wheeldown",
+      "mode": "tap"
+    },
+    "weapon_preset_prev": {
+      "label": "Weapon preset previous",
+      "keys": "wheelup",
+      "mode": "tap"
+    },
+    "staggered_fire": {
+      "label": "Staggered fire",
+      "keys": "",
+      "mode": "tap"
+    },
+    "precision_target": {
+      "label": "Precision targeting",
+      "keys": "rmb",
+      "mode": "tap"
+    },
+    "auto_target": {
+      "label": "Auto targeting",
+      "keys": "t",
+      "mode": "hold",
+      "holdMs": 800
+    },
+    "look_ahead": {
+      "label": "Look ahead",
+      "keys": "lalt+l",
+      "mode": "tap"
+    },
+    "subtarget_next": {
+      "label": "Sub-target next",
+      "keys": "r",
+      "mode": "tap"
+    },
+    "subtarget_reset": {
+      "label": "Sub-target reset",
+      "keys": "lalt+r",
+      "mode": "tap"
+    },
+    "pin_set_1": {
+      "label": "Pin target to 1",
+      "keys": "lalt+1",
+      "mode": "tap"
+    },
+    "pin_set_2": {
+      "label": "Pin target to 2",
+      "keys": "lalt+2",
+      "mode": "tap"
+    },
+    "pin_set_3": {
+      "label": "Pin target to 3",
+      "keys": "lalt+3",
+      "mode": "tap"
+    },
+    "decoy_panic": {
+      "label": "Decoy panic launch",
+      "keys": "",
+      "mode": "tap"
+    },
+    "missile_arm_less": {
+      "label": "Arm fewer missiles",
+      "keys": "",
+      "mode": "tap"
     }
   }
 }

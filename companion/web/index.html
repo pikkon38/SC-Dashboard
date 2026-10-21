@@ -205,12 +205,51 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .tile.big{min-height:calc(var(--u)*7);font-size:calc(var(--u)*1.7);flex:1;letter-spacing:.3em}
 .tile.lit,.rb.lit{background:var(--m);color:#020406;box-shadow:0 0 calc(var(--u)*1.2) var(--m2)}
 .tile.lit small{color:rgba(2,4,6,.65)}
-.unbound:is(.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head,.k){opacity:.38;border-style:dashed}
+.unbound:is(.tile,.sw,.lever,.trigger,.module,.rb,.rc,.head,.k,.chip-b){opacity:.38;border-style:dashed}
 .hold::before{content:"";position:absolute;inset:0;background:var(--m2);transform-origin:left;transform:scaleX(0);pointer-events:none}
 .hold.arming::before{transform:scaleX(1);transition:transform .7s linear}
 .tiles2{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*.7)}
 .tiles2 > :last-child:nth-child(odd){grid-column:1/-1}
 .tiles4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:calc(var(--u)*.6)}
+
+/* small, low-priority buttons (doors, locks...) */
+.pnl h4.sub{margin-top:calc(var(--u)*.4)}
+.chips{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.5)}
+.chip-b{flex:1 1 calc(var(--u)*8);min-height:calc(var(--u)*3.4);padding:0 calc(var(--u)*.8);border:1px solid var(--m3);border-radius:99px;color:var(--m2);
+  font-size:calc(var(--u)*.85);font-weight:700;letter-spacing:.14em;text-transform:uppercase;background:transparent;transition:background .12s}
+.chip-b:active,.chip-b.flash{background:var(--m3)}
+.chip-b.lit{color:var(--m);border-color:var(--m);background:var(--m4);box-shadow:0 0 8px var(--m3)}
+.msl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:calc(var(--u)*.8)}
+.mfd .msl .k{min-width:0;min-height:calc(var(--u)*4.4)}
+.cb .readout.huge{min-height:calc(var(--u)*5)} .cb .readout.huge b{font-size:calc(var(--u)*4)}
+.preset .readout{flex-direction:column;gap:.1em}
+.cb .pins{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cb .sw{min-height:calc(var(--u)*3.8)}
+/* emergency keys: red, along the bottom of the Flight frame */
+.keyrow.emerg .k{flex:1;letter-spacing:.14em;color:#ff8a80;border-color:#3a0d0d;
+  background:linear-gradient(180deg,#3a1d1f,#1c0c0d);box-shadow:inset 0 1px 0 rgba(255,140,130,.14),inset 0 0 0 1px rgba(255,60,60,.25),0 2px 0 #000}
+.keyrow.emerg .k i{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.cb .pins .tile{letter-spacing:.04em}
+.sdk .sd-on{display:none}
+body.sd .sdk .sd-on{display:inline} body.sd .sdk .sd-off{display:none}
+
+/* self destruct: the whole screen pulses red */
+#sdAlert{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
+body.sd #sdAlert{display:block}
+#sdAlert::before{content:"";position:absolute;inset:0;border:calc(var(--u)*.5) solid var(--bad);
+  background:radial-gradient(ellipse at center,transparent 45%,rgba(255,40,40,.32) 100%);
+  box-shadow:inset 0 0 calc(var(--u)*6) calc(var(--u)*1.5) rgba(255,40,40,.55);animation:sdpulse .9s ease-in-out infinite}
+@keyframes sdpulse{0%,100%{opacity:.25}50%{opacity:1}}
+#sdAlert::after{content:"";position:absolute;inset:0;background:rgba(255,30,30,.14);mix-blend-mode:screen;animation:sdpulse .9s ease-in-out infinite}
+.sdbar{position:absolute;z-index:1;left:50%;top:calc(env(safe-area-inset-top) + var(--u)*6.5);transform:translateX(-50%);pointer-events:auto;
+  display:flex;align-items:center;gap:calc(var(--u)*1.6);padding:calc(var(--u)*1) calc(var(--u)*1.2) calc(var(--u)*1) calc(var(--u)*1.8);
+  background:rgba(30,4,4,.94);border:2px solid var(--bad);border-radius:var(--r);box-shadow:0 0 calc(var(--u)*3) rgba(255,40,40,.6);max-width:calc(100vw - var(--u)*3)}
+.sdtxt{display:flex;flex-direction:column;gap:.2em;color:#ffd7d4}
+.sdtxt b{font-size:calc(var(--u)*1.5);letter-spacing:.3em;color:var(--bad);animation:sdblink .9s steps(1) infinite}
+@keyframes sdblink{50%{opacity:.35}}
+.sdtxt small{letter-spacing:.16em;text-transform:uppercase;font-size:calc(var(--u)*.85)}
+.sdcancel{--m:var(--bad);position:relative;overflow:hidden;min-height:calc(var(--u)*4.4);padding:0 calc(var(--u)*1.6);border:1px solid var(--bad);border-radius:3px;
+  color:#fff;background:rgba(255,60,60,.18);font-weight:700;letter-spacing:.2em;font-size:calc(var(--u)*1.05);--m2:rgba(255,80,80,.6)}
 
 /* switch rows */
 .sw{display:flex;align-items:center;justify-content:space-between;gap:1em;min-height:calc(var(--u)*4.4);padding:0 calc(var(--u)*1);font-size:calc(var(--u)*1.05);flex:none}
@@ -382,19 +421,52 @@ h3:first-child{margin-top:0}
   .tab{padding:calc(var(--u)*.7) calc(var(--u)*.9);letter-spacing:.1em}
 }
 .brand .bld{font-size:.55em;opacity:.55;letter-spacing:.08em;vertical-align:middle}
+.tab .ts{display:none}
+@media (max-width:480px){ .tab .tl{display:none} .tab .ts{display:inline} .tabs{flex:1;justify-content:space-between} .tab{flex:1;padding:0 .3em;letter-spacing:.08em} }
+@media (max-width:560px){
+  .keyrow.emerg .k{font-size:calc(var(--u)*.72);letter-spacing:.04em}
+  .sdbar{left:calc(var(--u)*1);right:calc(var(--u)*1);transform:none;justify-content:space-between;gap:calc(var(--u)*.8);padding:calc(var(--u)*.8)}
+  .sdtxt b{font-size:calc(var(--u)*1.1);letter-spacing:.16em}
+  .sdcancel{padding:0 calc(var(--u)*.8);letter-spacing:.1em;font-size:calc(var(--u)*.9)}
+}
+/* phones held sideways: very little height, so everything gets tighter and the panels scroll */
+@media (orientation:landscape) and (max-height:520px){
+  :root{--u: clamp(7px, 1.8vh, 11px);--gap:calc(var(--u)*.8)}
+  .app{gap:calc(var(--u)*.6)}
+  .tab{min-height:calc(var(--u)*3.6);padding:0 calc(var(--u)*1.2)}
+  .mfd{padding:calc(var(--u)*.7);gap:calc(var(--u)*.6);border-radius:calc(var(--u)*1)}
+  .mfd .k{min-height:calc(var(--u)*3.8);font-size:calc(var(--u)*.95)}
+  .mfd .keycol .k{min-width:calc(var(--u)*9);min-height:calc(var(--u)*4.6);font-size:calc(var(--u)*.9)}
+  .keycol{gap:calc(var(--u)*.6)}
+  .keycol .kgap{display:none}
+  .shead{padding-block:calc(var(--u)*.5)}
+  .sbody{padding:calc(var(--u)*.8);gap:calc(var(--u)*.8)}
+  .sbody.fl,.sbody.cb,.sbody.mn{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sbody.fl > :last-child,.sbody.cb > :first-child,.sbody.mn > :last-child{grid-column:auto}
+  .cb > :first-child{display:flex}
+  .tile.big{min-height:calc(var(--u)*6)}
+  .vslider .track{min-height:calc(var(--u)*16)}
+  .trigger{min-height:calc(var(--u)*10)}
+}
 </style>
 </head>
 <body>
+<div id="sdAlert" aria-live="assertive">
+  <div class="sdbar">
+    <div class="sdtxt"><b>SELF DESTRUCT ARMED</b><small>armed <span id="sdTime">0:00</span> ago</small></div>
+    <button class="sdcancel hold" data-a="self_destruct" data-k="confirm">HOLD TO CANCEL<i></i></button>
+  </div>
+</div>
 <div class="app" id="app">
   <header class="top">
     <div class="brand">SC // DASH <span class="bld" id="appVer"></span></div>
     <nav class="tabs">
-      <button class="tab on" data-view="power">Power</button>
-      <button class="tab" data-view="flight">Flight</button>
-      <button class="tab" data-view="combat">Combat</button>
-      <button class="tab" data-view="mining">Mining</button>
-      <button class="tab" data-view="salvage">Salvage</button>
-      <button class="tab" data-view="setup">Setup</button>
+      <button class="tab on" data-view="power"><span class="tl">Power</span><span class="ts">Pwr</span></button>
+      <button class="tab" data-view="flight"><span class="tl">Flight</span><span class="ts">Flt</span></button>
+      <button class="tab" data-view="combat"><span class="tl">Combat</span><span class="ts">Cmbt</span></button>
+      <button class="tab" data-view="mining"><span class="tl">Mining</span><span class="ts">Mine</span></button>
+      <button class="tab" data-view="salvage"><span class="tl">Salvage</span><span class="ts">Salv</span></button>
+      <button class="tab" data-view="setup"><span class="tl">Setup</span><span class="ts">Set</span></button>
     </nav>
     <div class="link"><span class="dot" id="dot"></span><span id="linktext">Offline</span></div>
   </header>
@@ -476,6 +548,7 @@ h3:first-child{margin-top:0}
             <button class="sw" data-a="gsafe" data-k="toggle"><span>G-safe</span><em></em></button>
             <button class="sw" data-a="esp" data-k="toggle"><span>ESP</span><em></em></button>
             <button class="sw" data-a="speed_limiter" data-k="toggle"><span>Speed limiter</span><em></em></button>
+            <button class="sw" data-a="lock_pitch_yaw" data-k="toggle"><span>Lock pitch &amp; yaw</span><em></em></button>
           </section>
           <section class="pnl land">
             <h4>Landing</h4>
@@ -487,13 +560,19 @@ h3:first-child{margin-top:0}
             </div>
           </section>
           <section class="pnl">
-            <h4>Docking & hatches</h4>
+            <h4>Docking &amp; cargo</h4>
             <div class="tiles2">
               <button class="tile" data-a="request_docking">Request<br>docking</button>
               <button class="tile" data-a="docking_camera" data-k="toggle">Docking<br>cam</button>
+              <button class="tile" data-a="port_lock_all" data-k="toggle">Port<br>lock</button>
+              <button class="tile" data-a="request_cargo">Request<br>cargo load</button>
             </div>
-            <button class="sw" data-a="doors" data-k="toggle"><span>Doors open</span><em></em></button>
-            <button class="sw" data-a="lock_doors" data-k="toggle"><span>Doors locked</span><em></em></button>
+            <h4 class="sub">Cabin</h4>
+            <div class="chips">
+              <button class="chip-b" data-a="doors" data-k="toggle">Doors</button>
+              <button class="chip-b" data-a="lock_doors" data-k="toggle">Locks</button>
+              <button class="chip-b" data-a="wipe_visor">Wipe visor</button>
+            </div>
           </section>
         </div>
       </div>
@@ -502,7 +581,13 @@ h3:first-child{margin-top:0}
         <button class="k" data-a="headtrack_recenter">RECENTER<i></i></button>
         <button class="k no hold" data-a="exit_seat" data-k="confirm">EXIT SEAT<i></i></button>
       </div>
-      <div></div><div class="keyrow"></div><div></div>
+      <div></div>
+      <div class="keyrow emerg">
+        <button class="k no hold" data-a="emergency_exit" data-k="confirm">EMERGENCY EXIT<i></i></button>
+        <button class="k no hold" data-a="eject" data-k="confirm">EJECT<i></i></button>
+        <button class="k no hold sdk" data-a="self_destruct" data-k="confirm"><span class="sd-off">SELF DESTRUCT</span><span class="sd-on">CANCEL SELF DESTRUCT</span><i></i></button>
+      </div>
+      <div></div>
     </div>
   </main>
 
@@ -525,11 +610,12 @@ h3:first-child{margin-top:0}
       <div class="screen">
         <div class="shead"><span class="ttl">Combat</span><span class="chip">TGT</span><span class="ship shipName"></span></div>
         <div class="sbody cb">
-          <section class="pnl">
+          <section class="pnl cm">
             <h4>Countermeasures</h4>
             <button class="tile big warn" data-a="decoy">DECOY<small>launch burst</small></button>
             <div class="stepper"><button class="k" data-a="decoy_burst_down" data-count="decoy:-1"><b>−</b></button><div class="readout"><b id="cnt-decoy">1</b><small>burst</small></div><button class="k" data-a="decoy_burst_up" data-count="decoy:1"><b>+</b></button></div>
             <button class="tile big warn" data-a="noise">NOISE<small>deploy field</small></button>
+            <button class="tile warn" data-a="decoy_panic">Decoy panic<small>dump all</small></button>
           </section>
           <section class="pnl">
             <h4>Targeting</h4>
@@ -541,15 +627,31 @@ h3:first-child{margin-top:0}
               <button class="rc" data-a="target_forward">AHEAD</button>
             </div>
             <div class="pins">
-              <button class="tile" data-a="pin_1">PIN 1</button><button class="tile" data-a="pin_2">PIN 2</button><button class="tile" data-a="pin_3">PIN 3</button>
+              <button class="tile" data-a="pin_1">LOCK 1</button><button class="tile" data-a="pin_2">LOCK 2</button><button class="tile" data-a="pin_3">LOCK 3</button>
               <button class="tile" data-a="pins_clear">CLEAR</button>
+              <button class="tile" data-a="pin_set_1">PIN 1</button><button class="tile" data-a="pin_set_2">PIN 2</button><button class="tile" data-a="pin_set_3">PIN 3</button>
+              <button class="tile" data-a="target_unlock">UNLOCK</button>
             </div>
-            <button class="tile" data-a="target_unlock">Unlock target</button>
+            <div class="tiles2">
+              <button class="tile" data-a="subtarget_next">Sub-target<br>next</button>
+              <button class="tile" data-a="subtarget_reset">Sub-target<br>reset</button>
+            </div>
+            <button class="sw" data-a="auto_target" data-k="toggle"><span>Auto targeting</span><em></em></button>
+            <button class="sw" data-a="look_ahead" data-k="toggle"><span>Look ahead</span><em></em></button>
           </section>
           <section class="pnl">
-            <h4>Missiles</h4>
-            <div class="readout huge"><b id="cnt-missiles">1</b><small>armed</small></div>
-            <button class="tile big" data-a="missile_arm_more" data-count="missiles:1">ARM +1</button>
+            <h4>Weapons</h4>
+            <div class="stepper preset"><button class="k" data-a="weapon_preset_prev"><b>◀</b></button><div class="readout"><small>weapon</small><small>preset</small></div><button class="k" data-a="weapon_preset_next"><b>▶</b></button></div>
+            <button class="sw" data-a="gimbal_toggle" data-k="toggle"><span>Gimbal locked</span><em></em></button>
+            <button class="sw" data-a="precision_target" data-k="toggle"><span>Precision targeting</span><em></em></button>
+            <button class="sw" data-a="staggered_fire" data-k="toggle"><span>Staggered fire</span><em></em></button>
+            <button class="tile" data-a="aim_mode">Aim mode<small>cycle</small></button>
+            <h4 class="sub">Missiles</h4>
+            <div class="msl">
+              <button class="k" data-a="missile_arm_less" data-count="missiles:-1"><b>−</b></button>
+              <div class="readout huge"><b id="cnt-missiles">1</b><small>armed</small></div>
+              <button class="k" data-a="missile_arm_more" data-count="missiles:1"><b>+</b></button>
+            </div>
             <button class="tile" data-a="missile_reset" data-set="missiles:1">Reset armed</button>
           </section>
         </div>
@@ -927,6 +1029,7 @@ function onShip(next){
   const key = next ? next.class + (next.power ? "+" : "") + "#" + (next.life || 0) : "";
   const changed = (next?.class || "") !== (ship?.class || "");
   if(changed) showAnyway = false;  // a new ship, or none (left seat, died): back to normal
+  if(changed && !next && ship && sd) setSD(false, true);  // left the seat or the ship is gone
   ship = next;
   if(changed) applyTheme();
   if(!next) return;
@@ -1006,7 +1109,7 @@ function tone(f0, f1, dur, type="sine", at=0, level=1){
 }
 // Sound set: WAV files made by make_sounds.py, served by the PC app. They play
 // on the iPad (Web Audio), through the PC's speakers (/api/sound), or both.
-const SOUNDS = ["click","tab","tick","deny","step_up","step_down","toggle_on","toggle_off","mode_on","mode_off",
+const SOUNDS = ["alarm","sd_cancel","eject","click","tab","tick","deny","step_up","step_down","toggle_on","toggle_off","mode_on","mode_off",
   "pwr_up","pwr_down","pwr_max","pwr_min","sys_on","sys_off","master_on","master_off","reset",
   "boot","quantum","spool_down","brake","lights","gear_down","gear_up","servo","door","comms","autoland",
   "decoy","noise_field","missile_arm","missile_reset","target","ping","scan","pin",
@@ -1069,6 +1172,10 @@ const SND = {
   salvage_fracture:["laser_on","laser_off"], salvage_disintegrate:["laser_on","laser_off"],
   social_accept:"accept", social_decline:"decline", chat_toggle:"chat",
   headtrack_toggle:["headtrack_on","headtrack_off"], headtrack_recenter:"recenter", exit_seat:"exit_seat",
+  eject:"eject", emergency_exit:"exit_seat", port_lock_all:["toggle_on","toggle_off"], request_cargo:"comms", wipe_visor:"door",
+  gimbal_toggle:["servo","servo"], aim_mode:"servo", weapon_preset_:"step_up", precision_target:["mode_on","mode_off"],
+  auto_target:["target","mode_off"], look_ahead:["toggle_on","toggle_off"], subtarget_:"target", pin_set_:"pin",
+  decoy_panic:"decoy", missile_arm_less:"missile_reset", staggered_fire:["toggle_on","toggle_off"],
 };
 function actionSound(a, kind){
   if(binds[a] && !binds[a].keys) return "deny";
@@ -1167,7 +1274,7 @@ function catOf(id){
   if(id.startsWith("mining_") || id === "jettison_cargo") return "mining";
   if(id.startsWith("salvage_")) return "salvage";
   if(/^(social_|chat_|exit_seat|headtrack_)/.test(id)) return "comms";
-  if(/^(decoy|noise|missile_|target_|pin_|pins_|hail|scan_mode|ping)/.test(id)) return "combat";
+  if(/^(decoy|noise|missile_|target_|pin_|pins_|hail|scan_mode|ping|gimbal_|aim_mode|weapon_preset_|staggered_|precision_|auto_target|look_ahead|subtarget_)/.test(id)) return "combat";
   return "flight";
 }
 let bindCat = "power";
@@ -1401,9 +1508,37 @@ document.addEventListener("pointerdown", e => {
   const c = e.target.closest('[data-k="confirm"]');
   if(!c) return;
   confEl = c; c.classList.add("arming");
-  confT = setTimeout(() => { longFired = true; c.classList.remove("arming"); flash(c); sfx(actionSound(c.dataset.a, "tap")); haptic(); press(c.dataset.a); }, 700);
+  confT = setTimeout(async () => {
+    longFired = true; c.classList.remove("arming"); flash(c); haptic();
+    const a = c.dataset.a;
+    if(a !== "self_destruct") sfx(actionSound(a, "tap"));
+    const ok = syncMode || await press(a);
+    if(ok && a === "self_destruct") setSD(!sd);
+  }, 700);
 });
 ["pointerup","pointercancel"].forEach(ev => document.addEventListener(ev, () => { clearTimeout(confT); confEl?.classList.remove("arming"); confEl = null; }));
+
+// ---- self destruct alarm ----
+// Star Citizen doesn't report self destruct, so the dashboard tracks the press it sent. The alarm runs while
+// you're in the seat and stops when you cancel, leave the seat, die, or after SD_MAX (the ship is gone by then).
+const SD_MAX = 180000;
+let sd = store.get("sd", null), sdTick;
+function setSD(on, quiet){
+  if(on && detect && !ship){ toast("Self destruct sent, but you're not in a seat the dashboard can see."); on = false; }
+  sd = on ? {at: Date.now()} : null;
+  store.set("sd", sd);
+  paintSD();
+  if(!quiet) sfx(on ? "alarm" : "sd_cancel");
+}
+function paintSD(){
+  if(sd && Date.now() - sd.at > SD_MAX){ sd = null; store.set("sd", null); }
+  document.body.classList.toggle("sd", !!sd);
+  clearInterval(sdTick);
+  if(!sd) return;
+  const t = () => { const e = Math.floor((Date.now() - sd.at) / 1000); $("#sdTime").textContent = `${Math.floor(e / 60)}:${String(e % 60).padStart(2, "0")}`;
+    if(Date.now() - sd.at > SD_MAX) setSD(false, true); };
+  t(); sdTick = setInterval(t, 1000);
+}
 
 async function latch(t){
   const a = t.dataset.a, on = !latched.has(a);
@@ -1442,7 +1577,7 @@ $("#pin").addEventListener("change", e => { store.set("pin", e.target.value.trim
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("dblclick", e => e.preventDefault(), {passive:false});
 
-buildCols(); fillProfile(); paintScreens();
+buildCols(); fillProfile(); paintScreens(); paintSD();
 poll(); setInterval(poll, 2000);
 })();
 </script>
