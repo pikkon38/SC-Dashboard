@@ -1,4 +1,6 @@
-More Flight controls and a more readable phone layout held sideways.
+Easier power controls.
 
-- Flight: exterior lights and night vision (LAMP) switches, look behind and freelook (held until you tap again), speed limit steps, throttle min/max, Starmap and mobiGlas keys, and a 3rd person camera button.
-- Phones held sideways: larger text; panels scroll when they don't fit.
+- Power: every system now has − and + buttons under its pip stack, so you don't have to hit the right pip. Hold them to jump to min or max.
+- Phones held sideways: the pip stacks are replaced by large − and + buttons.
+- New setting, Setup › Ship & pips › Power controls: "Simplified" uses only the − and + buttons on every screen.
+- The free power column no longer runs off the bottom on small screens.

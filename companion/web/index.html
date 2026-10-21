@@ -118,7 +118,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--u)*1.2),#000 calc(100% - var(--u)*1.2),transparent);
           mask-image:linear-gradient(90deg,transparent 0,#000 calc(var(--u)*1.2),#000 calc(100% - var(--u)*1.2),transparent)}
 .strip::-webkit-scrollbar{display:none}
-.col{flex:0 0 calc(var(--u)*13.5);scroll-snap-align:start;min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto;
+.col{flex:0 0 calc(var(--u)*13.5);scroll-snap-align:start;min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto auto;
   gap:calc(var(--u)*.55);justify-items:center;padding:calc(var(--u)*.5) calc(var(--u)*.25);border:1px solid transparent;border-radius:3px;transition:border-color .4s,background .4s}
 .col.ping{border-color:var(--m2);background:var(--m4);transition:none}
 .col .foot{display:flex;align-items:center;gap:calc(var(--u)*.6)}
@@ -148,6 +148,21 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .col.gen .pip.on{background:transparent;border-color:var(--m);box-shadow:inset 0 0 calc(var(--u)*.6) var(--m2)}
 .col.gen .pip.used{background:var(--m3);border-color:var(--m3)}
 .col{position:relative}
+/* fallback - / + under every pip stack; on small screens, or with Simplified power controls, they replace the stack */
+.col .steps{display:flex;gap:calc(var(--u)*.5);width:100%;padding:0 calc(var(--u)*.3)}
+.mfd .col .steps .k{flex:1;width:auto;min-height:calc(var(--u)*3.4)}
+.mfd .col .steps .k b{font-size:calc(var(--u)*1.7)}
+.col.gen .pips,.col .pips{overflow:hidden}
+.pip{min-height:2px}
+body.psimple .strip .pips{display:none}
+body.psimple .col .steps{grid-row:2;flex-direction:column-reverse;align-self:stretch;padding:0}
+body.psimple .mfd .col .steps .k{min-height:calc(var(--u)*4.5);flex:1}
+body.psimple .mfd .col .steps .k b{font-size:calc(var(--u)*3)}
+body.psimple .col .val{font-size:calc(var(--u)*3)}
+body.psimple .col .steps{min-height:calc(var(--u)*6)}
+body.psimple .mfd .col .steps .k{min-height:0}
+body.psimple .col .val{margin-bottom:calc(var(--u)*1.1)}
+body.psimple .col.unb::before{top:calc(var(--u)*3.9)}
 .col.unb::before{content:"TRACK ONLY";position:absolute;left:0;right:0;top:calc(var(--u)*4.1);font-size:calc(var(--u)*.7);letter-spacing:.2em;color:var(--warn);text-align:center;pointer-events:none}
 .shead .src{color:var(--m2)}
 .empty{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*1.2);
@@ -453,6 +468,7 @@ h3:first-child{margin-top:0}
   .tile.big{min-height:calc(var(--u)*6)}
   .vslider .track{min-height:calc(var(--u)*16)}
   .trigger{min-height:calc(var(--u)*10)}
+  .col .ico{display:none}
 }
 </style>
 </head>
@@ -835,6 +851,9 @@ h3:first-child{margin-top:0}
           <option value="#ffb547">Drake amber</option><option value="#e6edf2">Origin white</option>
           <option value="#4fe0e0">RSI cyan</option><option value="#ff7a5c">Crusader red</option></select></div>
         <div class="field"><label>Power plant pips</label><input type="number" min="1" max="60" id="pTotal"></div>
+        <div class="field"><label>Power controls</label><select id="pSimple">
+          <option value="auto">Pip stacks with − / + (auto)</option>
+          <option value="simple">Simplified: − / + only</option></select></div>
         <table>
           <thead><tr><th>System</th><th>Show</th><th>Min</th><th>Max</th><th>After reset</th></tr></thead>
           <tbody id="sysRows"></tbody>
@@ -985,6 +1004,7 @@ function buildCols(){
     <div class="col" data-col="${id}">
       <div class="val" id="lvl-${id}">0<span>/0</span></div>
       <div class="pips" id="pips-${id}">${Array.from({length: profile.max[id]}, (_,i)=>`<div class="pip${minOf(id) > 1 && i < minOf(id) ? " lk" : ""}" data-sys="${id}" data-i="${i+1}"></div>`).join("")}</div>
+      <div class="steps"><button class="k" data-dec="${id}"><b>−</b></button><button class="k" data-inc="${id}"><b>+</b></button></div>
       <svg class="ico" viewBox="0 0 24 24">${x.icon}</svg>
       <div class="lbl">${x.label}</div>
       <div class="foot">
@@ -1596,6 +1616,14 @@ $("#pin").addEventListener("change", e => { store.set("pin", e.target.value.trim
 document.addEventListener("gesturestart", e => e.preventDefault());
 document.addEventListener("dblclick", e => e.preventDefault(), {passive:false});
 
+// Simplified power controls: always in the setting's "simple" mode, and automatically when the
+// screen is too short for pip stacks to be tapped reliably.
+const shortMQ = matchMedia("(max-height: 560px)");
+function applyPowerMode(){ document.body.classList.toggle("psimple", store.get("powerSimple","auto") === "simple" || shortMQ.matches); }
+shortMQ.addEventListener?.("change", applyPowerMode);
+$("#pSimple").value = store.get("powerSimple","auto");
+$("#pSimple").addEventListener("change", e => { store.set("powerSimple", e.target.value); applyPowerMode(); });
+applyPowerMode();
 buildCols(); fillProfile(); paintScreens(); paintSD();
 poll(); setInterval(poll, 2000);
 })();
