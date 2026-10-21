@@ -225,6 +225,12 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .preset .readout{flex-direction:column;gap:.1em}
 .cb .pins{grid-template-columns:repeat(4,minmax(0,1fr))}
 .cb .sw{min-height:calc(var(--u)*3.8)}
+.minirow{display:grid;grid-template-columns:calc(var(--u)*7) 1fr 1fr;align-items:center;gap:calc(var(--u)*.6)}
+.minirow small{color:var(--m2);font-size:calc(var(--u)*.85);letter-spacing:.24em;text-transform:uppercase;font-weight:700}
+.mfd .minirow .k{min-width:0;min-height:calc(var(--u)*3.6)}
+.mfd .minirow .k b{font-size:calc(var(--u)*1.6)}
+.fl .tile{min-height:calc(var(--u)*4.4)}
+.fl .lever{min-height:calc(var(--u)*14)}
 /* emergency keys: red, along the bottom of the Flight frame */
 .keyrow.emerg .k{flex:1;letter-spacing:.14em;color:#ff8a80;border-color:#3a0d0d;
   background:linear-gradient(180deg,#3a1d1f,#1c0c0d);box-shadow:inset 0 1px 0 rgba(255,140,130,.14),inset 0 0 0 1px rgba(255,60,60,.25),0 2px 0 #000}
@@ -431,7 +437,7 @@ h3:first-child{margin-top:0}
 }
 /* phones held sideways: very little height, so everything gets tighter and the panels scroll */
 @media (orientation:landscape) and (max-height:520px){
-  :root{--u: clamp(7px, 1.8vh, 11px);--gap:calc(var(--u)*.8)}
+  :root{--u: clamp(8px, 2.3vh, 12px);--gap:calc(var(--u)*.7)}
   .app{gap:calc(var(--u)*.6)}
   .tab{min-height:calc(var(--u)*3.6);padding:0 calc(var(--u)*1.2)}
   .mfd{padding:calc(var(--u)*.7);gap:calc(var(--u)*.6);border-radius:calc(var(--u)*1)}
@@ -530,7 +536,8 @@ h3:first-child{margin-top:0}
         <button class="k" data-a="flight_ready">FLT READY<i></i></button>
         <button class="k" data-a="quantum_mode" data-k="toggle">QT MODE<i></i></button>
         <button class="k" data-a="space_brake">SPACE BRAKE<i></i></button>
-        <button class="k" data-a="lights" data-k="toggle">LIGHTS<i></i></button>
+        <button class="k" data-a="starmap">STARMAP<i></i></button>
+        <button class="k" data-a="mobiglas">MOBIGLAS<i></i></button>
       </div>
       <div></div>
       <div class="keycol">
@@ -547,8 +554,10 @@ h3:first-child{margin-top:0}
             <button class="sw" data-a="cruise" data-k="toggle"><span>Cruise control</span><em></em></button>
             <button class="sw" data-a="gsafe" data-k="toggle"><span>G-safe</span><em></em></button>
             <button class="sw" data-a="esp" data-k="toggle"><span>ESP</span><em></em></button>
-            <button class="sw" data-a="speed_limiter" data-k="toggle"><span>Speed limiter</span><em></em></button>
             <button class="sw" data-a="lock_pitch_yaw" data-k="toggle"><span>Lock pitch &amp; yaw</span><em></em></button>
+            <button class="sw" data-a="speed_limiter" data-k="toggle"><span>Speed limiter</span><em></em></button>
+            <div class="minirow"><small>Limit</small><button class="k" data-a="speed_limit_down"><b>−</b></button><button class="k" data-a="speed_limit_up"><b>+</b></button></div>
+            <div class="minirow"><small>Throttle</small><button class="k" data-a="throttle_min">MIN</button><button class="k" data-a="throttle_max">MAX</button></div>
           </section>
           <section class="pnl land">
             <h4>Landing</h4>
@@ -560,7 +569,14 @@ h3:first-child{margin-top:0}
             </div>
           </section>
           <section class="pnl">
-            <h4>Docking &amp; cargo</h4>
+            <h4>Lights &amp; view</h4>
+            <button class="sw" data-a="lights" data-k="toggle"><span>Exterior lights</span><em></em></button>
+            <button class="sw" data-a="lamp" data-k="toggle"><span>Night vision (LAMP)</span><em></em></button>
+            <div class="tiles2">
+              <button class="tile" data-a="look_behind" data-k="latch">Look<br>behind</button>
+              <button class="tile" data-a="freelook" data-k="latch">Free<br>look</button>
+            </div>
+            <h4 class="sub">Docking &amp; cargo</h4>
             <div class="tiles2">
               <button class="tile" data-a="request_docking">Request<br>docking</button>
               <button class="tile" data-a="docking_camera" data-k="toggle">Docking<br>cam</button>
@@ -572,6 +588,7 @@ h3:first-child{margin-top:0}
               <button class="chip-b" data-a="doors" data-k="toggle">Doors</button>
               <button class="chip-b" data-a="lock_doors" data-k="toggle">Locks</button>
               <button class="chip-b" data-a="wipe_visor">Wipe visor</button>
+              <button class="chip-b" data-a="camera_view">3rd person</button>
             </div>
           </section>
         </div>
@@ -1172,6 +1189,8 @@ const SND = {
   salvage_fracture:["laser_on","laser_off"], salvage_disintegrate:["laser_on","laser_off"],
   social_accept:"accept", social_decline:"decline", chat_toggle:"chat",
   headtrack_toggle:["headtrack_on","headtrack_off"], headtrack_recenter:"recenter", exit_seat:"exit_seat",
+  lamp:["mode_on","mode_off"], look_behind:["servo","servo"], freelook:["servo","servo"], throttle_min:"pwr_min", throttle_max:"pwr_max",
+  speed_limit_up:"step_up", speed_limit_down:"step_down", camera_view:"tab", mobiglas:"boot", starmap:"scan",
   eject:"eject", emergency_exit:"exit_seat", port_lock_all:["toggle_on","toggle_off"], request_cargo:"comms", wipe_visor:"door",
   gimbal_toggle:["servo","servo"], aim_mode:"servo", weapon_preset_:"step_up", precision_target:["mode_on","mode_off"],
   auto_target:["target","mode_off"], look_ahead:["toggle_on","toggle_off"], subtarget_:"target", pin_set_:"pin",

@@ -225,7 +225,7 @@
       "holdMs": 1500
     },
     "lights": {
-      "label": "Lights",
+      "label": "Exterior lights",
       "keys": "l",
       "mode": "tap"
     },
@@ -630,6 +630,56 @@
     "missile_arm_less": {
       "label": "Arm fewer missiles",
       "keys": "",
+      "mode": "tap"
+    },
+    "lamp": {
+      "label": "Light amplification (LAMP)",
+      "keys": "ralt+l",
+      "mode": "tap"
+    },
+    "look_behind": {
+      "label": "Look behind (held)",
+      "keys": "comma",
+      "mode": "tap"
+    },
+    "freelook": {
+      "label": "Freelook (held)",
+      "keys": "z",
+      "mode": "tap"
+    },
+    "throttle_min": {
+      "label": "Throttle to min",
+      "keys": "f9",
+      "mode": "double"
+    },
+    "throttle_max": {
+      "label": "Throttle to max",
+      "keys": "f10",
+      "mode": "double"
+    },
+    "speed_limit_up": {
+      "label": "Speed limiter step up",
+      "keys": "lalt+wheelup",
+      "mode": "tap"
+    },
+    "speed_limit_down": {
+      "label": "Speed limiter step down",
+      "keys": "lalt+wheeldown",
+      "mode": "tap"
+    },
+    "camera_view": {
+      "label": "Camera view (1st / 3rd)",
+      "keys": "f4",
+      "mode": "tap"
+    },
+    "mobiglas": {
+      "label": "mobiGlas",
+      "keys": "f1",
+      "mode": "tap"
+    },
+    "starmap": {
+      "label": "Starmap",
+      "keys": "f2",
       "mode": "tap"
     }
   }
