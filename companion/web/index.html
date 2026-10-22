@@ -41,6 +41,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .sbar{position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top), 24px);background:var(--bg);z-index:2147483647;pointer-events:none;display:none}
 @media (display-mode: standalone){ .sbar{display:block} }
 #linktext{overflow:hidden;text-overflow:ellipsis}
+#uprobe{position:absolute;visibility:hidden;width:var(--u);height:0;pointer-events:none}
 /* top bar */
 .top{display:flex;align-items:center;gap:var(--gap);position:relative;z-index:0}
 /* solid backing up to the very top edge (under the iPad's clock), no glow or scanlines behind the tabs */
@@ -51,7 +52,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
   text-transform:uppercase;letter-spacing:.2em;font-weight:700;min-height:calc(var(--u)*3.4)}
 .tab.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
 .link{display:flex;align-items:center;gap:.5em;min-width:0;font-size:calc(var(--u)*1.1);color:var(--dim);white-space:nowrap;text-transform:uppercase}
-.dot{width:.75em;height:.75em;border-radius:50%;background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.dot{flex:none;width:.75em;height:.75em;border-radius:50%;background:var(--bad);box-shadow:0 0 8px var(--bad)}
 .dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)}
 .dot.warn{background:var(--warn);box-shadow:0 0 8px var(--warn)}
 
@@ -486,6 +487,7 @@ h3:first-child{margin-top:0}
 </head>
 <body>
 <div class="sbar" aria-hidden="true"></div>
+<div id="uprobe" aria-hidden="true"></div>
 <div id="sdAlert" aria-live="assertive">
   <div class="sdbar">
     <div class="sdtxt"><b>SELF DESTRUCT ARMED</b><small>armed <span id="sdTime">0:00</span> ago</small></div>
@@ -513,6 +515,7 @@ h3:first-child{margin-top:0}
       <div class="keyrow" id="jump"></div>
       <div></div>
       <div class="keycol">
+        <button class="k" id="fltReadyBtn" data-act="flight_ready">FLT READY<i></i></button>
         <button class="k" id="powerBtn" data-act="pwr_all">PWR<i></i></button>
         <button class="k" id="resetBtn" data-act="pwr_reset">RST<i></i></button>
         <span class="kgap"></span>
@@ -1248,6 +1251,7 @@ function soundFor(t){
   if(t.id === "resetBtn") return "reset";
   if(t.id === "matchBtn") return syncMode ? "toggle_off" : "toggle_on";
   if(t.id === "syncBtn") return "reset";
+  if(t.id === "fltReadyBtn") return "boot";
   if(d.zero) return null;
   if(d.a) return actionSound(d.a, d.k || "tap");
   if(t.id === "testSound") return null;
@@ -1291,6 +1295,31 @@ async function setExtreme(s, max){
 // Lowering a system past its minimum does nothing in game, so pressing "down" max
 // times always lands it on its minimum; then raise each one to its dashboard level.
 let pushing = false;
+/* When a screen's panels hold more than fits (short screens, the iPad Home Screen app's taller top bar),
+   shrink that screen's unit size until everything fits instead of letting buttons spill past the panel. */
+function fitPanels(){
+  const sb = $(".view.on .sbody");
+  if(!sb) return;
+  sb.style.removeProperty("--u");
+  const base = $("#uprobe").getBoundingClientRect().width;
+  const over = () => [...sb.querySelectorAll(".pnl")].some(p => p.scrollHeight > p.clientHeight + 1);
+  for(let k = .96; over() && k >= .7; k -= .04) sb.style.setProperty("--u", (base * k) + "px");
+}
+addEventListener("resize", () => requestAnimationFrame(fitPanels));
+document.fonts?.ready.then(fitPanels);
+
+/* Ships spawn powered down while the dashboard shows them on. FLT READY powers the ship up, waits for it
+   to finish booting, then pushes the dashboard's pip levels to it (same as SYNC). */
+const FLT_READY_BOOT_MS = 4000;
+async function flightReady(btn){
+  if(pushing) return;
+  if(!(await press("flight_ready"))) return;
+  state.power = true; render();
+  toast("Flight ready. Matching power levels when the ship has powered up…", true);
+  await new Promise(res => setTimeout(res, FLT_READY_BOOT_MS));
+  return pushToShip(btn);
+}
+
 async function pushToShip(btn){
   if(pushing) return;
   const sys = SYS().filter(s => state.sysOn[s] && bound(`pwr_${s}_down`) && bound(`pwr_${s}_up`));
@@ -1386,6 +1415,7 @@ document.addEventListener("click", async e => {
     $$(".tab").forEach(x=>x.classList.toggle("on", x===t));
     $$(".view").forEach(v=>v.classList.toggle("on", v.id===d.view));
     if(d.view==="setup") fillProfile();
+    fitPanels();
     return;
   }
   if(t.classList.contains("pip")) return;  // pips are handled by the column drag below
@@ -1415,6 +1445,7 @@ document.addEventListener("click", async e => {
     return;
   }
   if(t.id==="syncBtn") return pushToShip(t);
+  if(t.id==="fltReadyBtn") return flightReady(t);
   if(d.zero) return rezero(d.zero);
   if(d.nudge){ const [n, by] = d.nudge.split(":"); sfx(+by > 0 ? "step_up" : "step_down"); return setSlider(n, state.sliders[n] + +by); }
   if(d.a) return screenAction(t);

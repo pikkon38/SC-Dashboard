@@ -1,4 +1,5 @@
-Sharp tabs on the iPad Home Screen app.
+Flight Ready on the Power screen, and nothing runs off the bottom.
 
-- iPadOS 26 blurs the top of Home Screen apps under the clock and battery. The dashboard now gives iPadOS a solid strip there, which turns that blur off, so the tabs stay sharp.
-- The link status reads "Game not focused" instead of a longer label that was cut off on the iPad.
+- Power: new FLT READY key (top of the left column). Ships start powered down while the dashboard shows them on; FLT READY powers the ship up, waits 4 seconds for it to boot, then sets every system's pips to what the dashboard shows, like SYNC.
+- Flight, Combat, Mining and Salvage panels shrink to fit when the screen is short (for example the iPad Home Screen app), so buttons like Throttle MIN/MAX and the cabin buttons no longer spill past the panel.
+- The link status dot no longer squashes when the status text is long.
