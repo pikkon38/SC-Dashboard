@@ -36,6 +36,11 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 /* Opened from the Home Screen, the iPad's clock and battery sit over the page; keep the tabs below them. */
 @media (display-mode: standalone){ .app{padding-top:calc(max(env(safe-area-inset-top), 24px) + 14px + var(--gap))} }
 
+/* iPadOS 26 blurs whatever sits under the status bar in a Home Screen app unless a fixed, full-width,
+   opaque strip (taller than 10px) covers the top edge; WebKit then paints that strip's color instead of the blur. */
+.sbar{position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top), 24px);background:var(--bg);z-index:2147483647;pointer-events:none;display:none}
+@media (display-mode: standalone){ .sbar{display:block} }
+#linktext{overflow:hidden;text-overflow:ellipsis}
 /* top bar */
 .top{display:flex;align-items:center;gap:var(--gap);position:relative;z-index:0}
 /* solid backing up to the very top edge (under the iPad's clock), no glow or scanlines behind the tabs */
@@ -45,7 +50,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;background:none;border:
 .tab{padding:calc(var(--u)*.7) calc(var(--u)*2);border:1px solid var(--line);border-radius:var(--r);color:var(--dim);
   text-transform:uppercase;letter-spacing:.2em;font-weight:700;min-height:calc(var(--u)*3.4)}
 .tab.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
-.link{display:flex;align-items:center;gap:.5em;font-size:calc(var(--u)*1.1);color:var(--dim);white-space:nowrap;text-transform:uppercase}
+.link{display:flex;align-items:center;gap:.5em;min-width:0;font-size:calc(var(--u)*1.1);color:var(--dim);white-space:nowrap;text-transform:uppercase}
 .dot{width:.75em;height:.75em;border-radius:50%;background:var(--bad);box-shadow:0 0 8px var(--bad)}
 .dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)}
 .dot.warn{background:var(--warn);box-shadow:0 0 8px var(--warn)}
@@ -480,6 +485,7 @@ h3:first-child{margin-top:0}
 </style>
 </head>
 <body>
+<div class="sbar" aria-hidden="true"></div>
 <div id="sdAlert" aria-live="assertive">
   <div class="sdbar">
     <div class="sdtxt"><b>SELF DESTRUCT ARMED</b><small>armed <span id="sdTime">0:00</span> ago</small></div>
@@ -980,7 +986,7 @@ async function poll(){
     if(s.version && !appVersion){ appVersion = s.version; $("#appVer").textContent = s.version.replace(/-dev$/, ""); }
     const dot = $("#dot"), txt = $("#linktext");
     if(s.dryRun){ dot.className="dot warn"; txt.textContent="Linked · test mode"; }
-    else if(!s.gameFocused){ dot.className="dot warn"; txt.textContent="Linked · game not focused"; }
+    else if(!s.gameFocused){ dot.className="dot warn"; txt.textContent="Game not focused"; }
     else { dot.className="dot ok"; txt.textContent="Linked · Star Citizen"; }
     if(!Object.keys(binds).length) loadBinds();
     detect = !!s.detect;
